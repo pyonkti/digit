@@ -93,20 +93,23 @@ for image_file in image_files:
     rho_difference.append(pow(rho-np.average(rho_buffer, axis=0),2))
     theta_difference.append(pow(theta-np.average(theta_buffer, axis=0),2))
 
-plt.figure() 
-plt.plot(rho_difference)
-plt.xlabel('frame id')
-plt.ylabel('rho difference')
-plt.title('Plot 1')
+fig, axs = plt.subplots(2, 1)  # 2 rows, 1 column
 
-plt.figure() 
-plt.plot(theta_difference)
-plt.xlabel('frame id')
-plt.ylabel('theta difference')
-plt.title('Plot 2')
+# First subplot
+axs[0].plot(rho_difference)
+axs[0].set_xlabel('Frame ID')
+axs[0].set_ylabel('Rho difference')
+axs[0].set_title('Plot 1')
 
-plt.legend()
-plt.show()     
+# Second subplot
+axs[1].plot(theta_difference)
+axs[1].set_xlabel('Frame ID')
+axs[1].set_ylabel('Theta difference')
+axs[1].set_title('Plot 2')
+
+# Adjust layout
+plt.tight_layout()
+plt.show()    
 
     #draw fetched line
     #a = math.cos(theta)
