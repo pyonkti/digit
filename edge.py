@@ -3,9 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 import glob
-import math
 from matplotlib import pyplot as plt
-     
+
 # Load an image from file
 image_path = 'screenshot/frames/*.png'
 image_files = sorted(glob.glob(image_path))
