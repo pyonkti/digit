@@ -1,7 +1,7 @@
 from digit_interface import Digit
 from digit_interface import DigitHandler
  
-d = Digit("D20790") # Unique serial number
+d = Digit("D20782") # Unique serial number
 d.connect()
 #d.set_intensity(intensity=15)
 d.show_view()

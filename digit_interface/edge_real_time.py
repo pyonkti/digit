@@ -30,6 +30,7 @@ rate = 100
 theta_min = np.pi / 180 * 10  
 theta_max = np.pi / 180 * 170
 lines = cv2.HoughLines(edges, 1, np.pi / 180, rate, None, 0, 0)
+
 for i in range(len(lines) - 1, -1, -1):
     theta = lines[i][0][1]
     if not (theta_min < theta < theta_max):
