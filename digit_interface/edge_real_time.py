@@ -2,18 +2,20 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+import math
 
 from digit_interface import Digit
 from digit_interface import DigitHandler
 
 from datetime import datetime
 import os
-    
+
+image_path = 'digit/screenshot/frames/2024-03-08 16-48-410017.png'
 pattern1 = r'\d{6}'
-matches1 = re.findall(pattern1, image_file)
+matches1 = re.findall(pattern1, image_path)
 id_string = ' '.join(matches1)
-grey_image = cv2.imread(image_file, cv2.IMREAD_GRAYSCALE)
-image_file = cv2.imread(image_file)
+grey_image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+image_file = cv2.imread(image_path)
 #print(id_string)
 # Check if the image is loaded successfully
 if grey_image is None:
@@ -70,6 +72,7 @@ for i in range(0, len(lines)):
 rho = int(sum_rho/len(lines))
 theta = sum_theta/len(lines)
 
+"""
 if len(rho_buffer) <10:
     rho_buffer.append(rho)
     theta_buffer.append(theta)
@@ -105,18 +108,19 @@ axs[1].set_title('Plot 2')
 # Adjust layout
 plt.tight_layout()
 plt.show()    
-
+"""
 #draw fetched line
-#a = math.cos(theta)
-#b = math.sin(theta)
-#x0 = a * rho
-#y0 = b * rho
-#pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-#pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-#cv2.line(image_file, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+a = math.cos(theta)
+b = math.sin(theta)
+x0 = a * rho
+y0 = b * rho
+pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+cv2.line(image_file, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
 
 #cv2.imwrite('screenshot/frames/final match/final match'+id_string+'.png',image_file)
+
 # Display Canny Edge Detection Image
-#cv2.imshow('Canny Edge Detection'+id_string, image_file)
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
+cv2.imshow('Canny Edge Detection'+id_string, image_file)
+cv2.waitKey(0)
+cv2.destroyAllWindows()

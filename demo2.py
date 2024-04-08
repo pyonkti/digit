@@ -52,7 +52,6 @@ def process_continuous_frames(d):
             edges = cv2.Canny(image=blurred_image, threshold1=0, threshold2=10) # Canny Edge Detection
 
             rate = 100
-
             lines = cv2.HoughLines(edges, 1, np.pi / 180, rate, None, 0, 0)
 
             if lines is not None:
@@ -67,7 +66,7 @@ def process_continuous_frames(d):
                     lines = remove_vertical_lines(lines)
                     if len(lines) != 0:
                         print('should be a line 1')
-                        draw_line(lines, grey_image)
+                        draw_line(lines, frame)
                         break
 
                 if not len(last_lines) == 0:
@@ -79,12 +78,12 @@ def process_continuous_frames(d):
                         print('should be a line 2')
                         if len(lines) == 0:
                             lines = last_lines 
-                            draw_line(lines, grey_image)
+                            draw_line(lines, frame)
                             break   
                 else:
-                    draw_line(lines, grey_image)
+                    draw_line(lines, frame)
 
-            cv2.imshow("Detected Lines (in red)", edges)
+            cv2.imshow("Detected Lines (in red)", frame)
             # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
