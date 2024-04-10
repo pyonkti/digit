@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import re
 import glob
 from matplotlib import pyplot as plt
+import math
 
 # Load an image from file
 image_path = 'screenshot/frames/*.png'
@@ -31,7 +32,7 @@ for image_file in image_files:
     # Canny Edge Detection
     edges = cv2.Canny(image=blurred_image, threshold1=0, threshold2=10) # Canny Edge Detection
 
-    rate = 100
+    rate = 120
     theta_min = np.pi / 180 * 10  
     theta_max = np.pi / 180 * 170
     lines = cv2.HoughLines(edges, 1, np.pi / 180, rate, None, 0, 0)
@@ -74,7 +75,22 @@ for image_file in image_files:
     rho = int(sum_rho/len(lines))
     theta = sum_theta/len(lines)
     
-    if len(rho_buffer) <10:
+    #draw fetched line
+    a = math.cos(theta)
+    b = math.sin(theta)
+    x0 = a * rho
+    y0 = b * rho
+    pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+    pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+    cv2.line(image_file, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+    
+    cv2.imwrite('screenshot/frames/final match/final match'+id_string+'.png',image_file)
+    # Display Canny Edge Detection Image
+    cv2.imshow('Canny Edge Detection'+id_string, image_file)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    
+'''    if len(rho_buffer) <10:
         rho_buffer.append(rho)
         theta_buffer.append(theta)
     else:
@@ -108,20 +124,6 @@ axs[1].set_title('Plot 2')
 
 # Adjust layout
 plt.tight_layout()
-plt.show()    
+plt.show()   ''' 
 
-    #draw fetched line
-    #a = math.cos(theta)
-    #b = math.sin(theta)
-    #x0 = a * rho
-    #y0 = b * rho
-    #pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-    #pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-    #cv2.line(image_file, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
-    
-    #cv2.imwrite('screenshot/frames/final match/final match'+id_string+'.png',image_file)
-    # Display Canny Edge Detection Image
-    #cv2.imshow('Canny Edge Detection'+id_string, image_file)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
 
