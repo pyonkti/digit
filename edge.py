@@ -30,7 +30,11 @@ for image_file in image_files:
     blurred_image = cv2.GaussianBlur(grey_image, (5, 5), 0)
 
     # Canny Edge Detection
-    edges = cv2.Canny(image=blurred_image, threshold1=0, threshold2=10) # Canny Edge Detection
+    edges = cv2.Canny(image=blurred_image, threshold1=10, threshold2=0) # Canny Edge Detection
+
+    cv2.imshow('Canny Edge Detection'+id_string, edges)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     rate = 120
     theta_min = np.pi / 180 * 10  
