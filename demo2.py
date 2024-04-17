@@ -14,22 +14,26 @@ def remove_vertical_lines(lines):
             filtered_lines.append(line)
     return np.array(filtered_lines)
 
-def draw_line(lines,grey_image):
-    sum_rho = 0
-    sum_theta = 0   
-    for i in range(0, len(lines)):
-        sum_rho += lines[i][0][0]
-        sum_theta += lines[i][0][1]
+def draw_line(lines, grey_image):
+    if lines is None or len(lines) == 0:
+        print("No lines found")
+        return  # No lines to process
 
-    rho = int(sum_rho/len(lines))
-    theta = sum_theta/len(lines)
-    a = math.cos(theta)
-    b = math.sin(theta)
-    x0 = a * rho
-    y0 = b * rho
-    pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-    pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-    cv2.line(grey_image, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+    try:
+        # Find the line with the smallest rho value
+        closest_line = min(lines, key=lambda line: line[0][0])
+        rho, theta = closest_line[0]
+        a = math.cos(theta)
+        b = math.sin(theta)
+        x0 = a * rho
+        y0 = b * rho
+        pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+        pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+
+        # Draw the closest line
+        cv2.line(grey_image, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
+    except TypeError as e:
+        print(f"An error occurred: {e}")
         
 def process_continuous_frames(d):
     """
@@ -62,39 +66,39 @@ def process_continuous_frames(d):
 
             rate = 70
             break_rate = 60
-            lines = cv2.HoughLines(edges, 1, np.pi / 180, rate, None, 0, 0)
+            threshold_increment = 5  # How much to change the threshold by in each iteration
+            found_lines = False
 
-            if lines is None:
+            # First attempt to find lines with initial rate
+            lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
+
+            # Adjust rate until lines are found, adhering to break_rate limit
+            while lines is None or len(remove_vertical_lines(lines)) == 0 and rate > break_rate:
+                rate -= threshold_increment
+                lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
                 cv2.imshow("Detected Lines (in red)", frame)
                 # Break the loop if 'q' is pressed
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
-            else:
-                lines = remove_vertical_lines(lines)            
-                last_lines = lines
-                while len(lines) == 0:
-                    last_lines = lines
-                    rate -= 5
-                    if rate <= break_rate:
-                        break
-                    lines = cv2.HoughLines(edges, 1, np.pi / 180, rate, None, 0, 0)
-                    lines = remove_vertical_lines(lines)
-                    if len(lines) != 0:
-                        draw_line(lines, frame)
-                        break
 
-                if len(last_lines) > 0:
-                    if 1 <= len(lines) <= 5:
-                        draw_line(lines, frame)
-                    while len(lines) > 5:
-                        last_lines = lines
-                        rate += 5
-                        lines = cv2.HoughLines(edges, 1, np.pi / 180, rate, None, 0, 0)
-                        lines = remove_vertical_lines(lines)
-                        if len(lines) == 0:
-                            lines = last_lines 
+            # If lines are found, filter out vertical lines
+            if lines is not None:
+                lines = remove_vertical_lines(lines)
+                if len(lines) > 0:
+                    found_lines = True
+
+            # If more than 3 lines are found, try to narrow it down by increasing the threshold
+            if found_lines and len(lines) > 3:
+                while len(lines) > 3 and rate < 70:  # Assuming 70 is the upper limit for rate
+                    rate += threshold_increment
+                    temp_lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
+                    if temp_lines is not None:
+                        temp_lines = remove_vertical_lines(temp_lines)
+                        if len(temp_lines) > 0:
+                            lines = temp_lines  # Update lines with the filtered results
                             draw_line(lines, frame)
-                            break   
+                        else:
+                            break  # Exit the loop if no lines are found in the current iteration
 
             cv2.imshow("Detected Lines (in red)", frame)
             # Break the loop if 'q' is pressed
