@@ -21,10 +21,10 @@ def draw_line(lines, grey_image):
 
     try:
         # Find the line with the smallest rho value
-        #closest_line = min(lines, key=lambda line: line[0][0])
-        rho = sum(line[0][0] for line in lines) / len(lines)
-        theta = sum(line[0][1] for line in lines) / len(lines)
-        #rho, theta = closest_line[0]
+        closest_line = min(lines, key=lambda line: line[0][0])
+        #rho = sum(line[0][0] for line in lines) / len(lines)
+        #theta = sum(line[0][1] for line in lines) / len(lines)
+        rho, theta = closest_line[0]
         a = math.cos(theta)
         b = math.sin(theta)
         x0 = a * rho
@@ -67,8 +67,8 @@ def process_continuous_frames(d):
             # Canny Edge Detection
             edges = cv2.Canny(image=blurred_image, threshold1=20, threshold2=10) # Canny Edge Detection
 
-            rate = 80
-            break_rate = 50
+            rate = 100
+            break_rate = 70
             threshold_increment = 5  # How much to change the threshold by in each iteration
             found_lines = False
 
@@ -90,8 +90,8 @@ def process_continuous_frames(d):
                     found_lines = True
 
             # If more than 3 lines are found, try to narrow it down by increasing the threshold
-            if found_lines and len(lines) > 5:
-                while len(lines) > 5: 
+            if found_lines and len(lines) > 8:
+                while len(lines) > 8: 
                     rate += threshold_increment
                     temp_lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
                     if temp_lines is None:
@@ -99,12 +99,12 @@ def process_continuous_frames(d):
                         break
                     elif temp_lines is not None:
                         temp_lines = remove_vertical_lines(temp_lines)
-                        if 0 < len(temp_lines) <= 5:
+                        if 0 < len(temp_lines) <= 8:
                             lines = temp_lines  # Update lines with the filtered results
                             draw_line(lines, frame)
                         else:
                             break  # Exit the loop if no lines are found in the current iteration
-            elif found_lines and 0 < len(lines) <= 5:
+            elif found_lines and 0 < len(lines) <= 8:
                 draw_line(lines, frame)
 
             cv2.imshow("Detected Lines (in red)", frame)
