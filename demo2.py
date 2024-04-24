@@ -21,7 +21,6 @@ def draw_line(lines, grey_image):
 
     try:
         # Find the line with the smallest rho value
-        print(len(lines))
         closest_line = min(lines, key=lambda line: line[0][0])
         #rho = sum(line[0][0] for line in lines) / len(lines)
         #theta = sum(line[0][1] for line in lines) / len(lines)
@@ -42,38 +41,42 @@ def process_continuous_frames(d):
     """
     Continuously captures and processes frames from the DIGIT device.
     """
-    frame_id = 0
+    for _ in range(20):
+        d.get_frame()
+
+    background_frame = d.get_frame()
+    blurred_base_frame = cv2.GaussianBlur(cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY), (3, 3), 0)
+
     try:
         while True:
+            rate = 194
+            break_rate = 50
+            threshold_increment = 5  # How much to change the threshold by in each iteration
+            found_lines = False
+            gaussian = 21
+            median = 9
+            canny_threshold1=163
+            canny_threshold2= 264
+            line_threshold= 13
+
             frame = d.get_frame()
             height, width, channels = frame.shape
             if not isinstance(frame, np.ndarray):
                 print("Error: Frame is not a valid numpy array.")
                 exit()
-            if frame_id < 20:  
-                frame_id += 1
-                continue
-            if frame_id == 20:
-                blurred_base_frame = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (5, 5), 0)
-                frame_id += 1
 
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             # Apply GaussianBlur to reduce noise and help in edge detection
-            blurred_image = cv2.GaussianBlur(grey_image, (3, 3), 0)
-            blurred_image = cv2.medianBlur(blurred_image,5)
+            blurred_image = cv2.GaussianBlur(grey_image, (gaussian, gaussian), 0)
+            blurred_image = cv2.medianBlur(blurred_image,median)
 
             if blurred_base_frame is not None:
                 blurred_image = blurred_image - blurred_base_frame
 
             # Canny Edge Detection
-            edges = cv2.Canny(image=blurred_image, threshold1=80, threshold2=161) # Canny Edge Detection
+            edges = cv2.Canny(image=blurred_image, threshold1=canny_threshold1, threshold2=canny_threshold2) # Canny Edge Detection
 
-            rate = 130
-            break_rate = 100
-            threshold_increment = 5  # How much to change the threshold by in each iteration
-            line_threshold = 5
-            found_lines = False
 
             # First attempt to find lines with initial rate
             lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)

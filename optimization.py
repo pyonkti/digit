@@ -11,11 +11,17 @@ def remove_vertical_lines(lines):
             filtered_lines.append(line)
     return np.array(filtered_lines)
 
+def calculate_penalty(lines,line_threshold):
+    if lines is None or len(lines) == 0:
+        return 1000
+    elif len(lines) <= line_threshold:
+        return 0  # No penalty for 1 to 3 lines detected
+    else:
+        return (len(lines) - line_threshold) * 10  # Adjust the penalty factor as needed
+
 def measure_stability(d, gaussian_kernel, median_kernel, canny_threshold1, canny_threshold2, hough_rate, line_threshold):
     frame_count = 150  # Number of frames to analyze for stability
     rhos = []
-    thetas = []
-    total_lines_detected = 0
 
     for _ in range(20):
         d.get_frame()
@@ -37,32 +43,38 @@ def measure_stability(d, gaussian_kernel, median_kernel, canny_threshold1, canny
         edges = cv2.Canny(blurred_image, canny_threshold1, canny_threshold2)
 
         lines = cv2.HoughLines(edges, 1, np.pi / 180, hough_rate)
-        lines = remove_vertical_lines(lines) if lines is not None else []
 
         if lines is not None:
-            closest_line = min(lines, key=lambda line: line[0][0])
-            rho, theta = closest_line[0]
-            rhos.append(rho)
-            total_lines_detected += len(lines)
+            lines = remove_vertical_lines(lines)
+            num_lines = len(lines)
+            if num_lines > 0:
+                closest_line = min(lines, key=lambda line: line[0][0])
+                rho, theta = closest_line[0]
+                rhos.append(rho)
+    
 
-    variance_rho = np.var(rhos)
-    penalty = 1000 * (frame_count - total_lines_detected) if total_lines_detected < 5 else 0
  
     cv2.imshow("Detach the object and press any key to continue", frame)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
     # Combine variance or use another metric if more appropriate
-    return variance_rho + penalty  # Objective to minimize
+    if len(rhos) == 0:
+        penalty = calculate_penalty(lines,line_threshold)
+        return penalty  
+    else:
+        variance_rho = np.var(rhos)
+        penalty = calculate_penalty(lines,line_threshold)
+        return variance_rho + penalty  # Objective to minimize
 
 def objective(trial):
     # Hyperparameters to optimize
-    gaussian_kernel = trial.suggest_int('gaussian_kernel', 3, 15, step=2)  # Kernel size for Gaussian Blur must be odd
+    gaussian_kernel = trial.suggest_int('gaussian_kernel', 11, 31, step=2)  # Kernel size for Gaussian Blur must be odd
     median_kernel = trial.suggest_int('median_kernel', 3, 11, step=2)  # Kernel size for Median Blur must be odd
     canny_threshold1 = trial.suggest_int('canny_threshold1', 10, 200)
     canny_threshold2 = trial.suggest_int('canny_threshold2', 50, 300)
     hough_rate = trial.suggest_int('hough_rate', 50, 200)
-    line_threshold = trial.suggest_int('line_threshold', 3, 20)
+    line_threshold = trial.suggest_int('line_threshold', 3, 30)
 
     # Create an instance of Digit, assumed already connected
     d = Digit("D20790")  # Unique serial number
