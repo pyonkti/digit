@@ -21,6 +21,7 @@ def draw_line(lines, grey_image):
 
     try:
         # Find the line with the smallest rho value
+        print(len(lines))
         closest_line = min(lines, key=lambda line: line[0][0])
         #rho = sum(line[0][0] for line in lines) / len(lines)
         #theta = sum(line[0][1] for line in lines) / len(lines)
@@ -45,31 +46,33 @@ def process_continuous_frames(d):
     try:
         while True:
             frame = d.get_frame()
+            height, width, channels = frame.shape
             if not isinstance(frame, np.ndarray):
                 print("Error: Frame is not a valid numpy array.")
                 exit()
-            if frame_id < 10:  
+            if frame_id < 20:  
                 frame_id += 1
                 continue
-            if frame_id == 10:
+            if frame_id == 20:
                 blurred_base_frame = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (5, 5), 0)
                 frame_id += 1
 
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             # Apply GaussianBlur to reduce noise and help in edge detection
-            blurred_image = cv2.GaussianBlur(grey_image, (7, 7), 0)
-            blurred_image = cv2.medianBlur(blurred_image,7)
+            blurred_image = cv2.GaussianBlur(grey_image, (3, 3), 0)
+            blurred_image = cv2.medianBlur(blurred_image,5)
 
             if blurred_base_frame is not None:
                 blurred_image = blurred_image - blurred_base_frame
 
             # Canny Edge Detection
-            edges = cv2.Canny(image=blurred_image, threshold1=20, threshold2=10) # Canny Edge Detection
+            edges = cv2.Canny(image=blurred_image, threshold1=80, threshold2=161) # Canny Edge Detection
 
-            rate = 100
-            break_rate = 70
+            rate = 130
+            break_rate = 100
             threshold_increment = 5  # How much to change the threshold by in each iteration
+            line_threshold = 5
             found_lines = False
 
             # First attempt to find lines with initial rate
@@ -90,8 +93,8 @@ def process_continuous_frames(d):
                     found_lines = True
 
             # If more than 3 lines are found, try to narrow it down by increasing the threshold
-            if found_lines and len(lines) > 8:
-                while len(lines) > 8: 
+            if found_lines and len(lines) > line_threshold:
+                while len(lines) > line_threshold: 
                     rate += threshold_increment
                     temp_lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
                     if temp_lines is None:
@@ -99,15 +102,22 @@ def process_continuous_frames(d):
                         break
                     elif temp_lines is not None:
                         temp_lines = remove_vertical_lines(temp_lines)
-                        if 0 < len(temp_lines) <= 8:
+                        if 0 < len(temp_lines) < line_threshold:
                             lines = temp_lines  # Update lines with the filtered results
                             draw_line(lines, frame)
                         else:
                             break  # Exit the loop if no lines are found in the current iteration
-            elif found_lines and 0 < len(lines) <= 8:
+            elif found_lines and 0 < len(lines) < line_threshold:
                 draw_line(lines, frame)
 
-            cv2.imshow("Detected Lines (in red)", frame)
+            tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
+
+            # Place images into the layout
+            tiled_layout[0:height, 0:width] = frame
+            tiled_layout[0:height, width:width*2] = cv2.cvtColor(blurred_image, cv2.COLOR_GRAY2BGR)
+            tiled_layout[0:height, width*2:width*3] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+
+            cv2.imshow("Detected Lines (in red)",tiled_layout)
             # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
