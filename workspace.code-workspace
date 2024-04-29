@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../../../../stadmin/hdd/Wei/workspace"
+		},
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../franka_ros2_ws"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"new": "cpp",
+			"version": "cpp",
+			"any": "cpp",
+			"optional": "cpp",
+			"variant": "cpp"
+		}
+	}
+}
