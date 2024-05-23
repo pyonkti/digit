@@ -1,7 +1,14 @@
+import sys
+import logging
+sys.path.append('/home/wei/Desktop/digit/pybind_src')
+from datetime import datetime 
 import cv2
 import numpy as np
 import optuna
 from digit_interface import Digit
+import grasp_object_pybind
+import json
+
 
 def remove_vertical_lines(lines):
     filtered_lines = []
@@ -29,9 +36,9 @@ def measure_stability(d, gaussian_kernel, median_kernel, canny_threshold1, canny
     background_frame = d.get_frame()
     blurred_base_frame = cv2.GaussianBlur(cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY), (gaussian_kernel, gaussian_kernel), 0)
 
-    cv2.imshow("Position the object and press any key to continue", background_frame)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    close_result =  grasp_object_pybind.grasp_object('172.31.1.17', 1, '0')
+    if close_result != 0:
+        print("error grasping")
 
     for _ in range(frame_count):
         frame = d.get_frame()
@@ -53,10 +60,9 @@ def measure_stability(d, gaussian_kernel, median_kernel, canny_threshold1, canny
                 rhos.append(rho)
     
 
- 
-    cv2.imshow("Detach the object and press any key to continue", frame)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    open_result = grasp_object_pybind.open_gripper('172.31.1.17')
+    if open_result != 0:
+        print("error oppening")
 
     # Combine variance or use another metric if more appropriate
     if len(rhos) == 0:
@@ -85,9 +91,20 @@ def objective(trial):
     return variance
 
 def main():
-    study = optuna.create_study()  # Default is to minimize
-    study.optimize(objective, n_trials=50)  # Adjust number of trials based on available time and resources
+    dt = datetime.now()
 
+    optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
+    study_name = str(dt)  # Unique identifier of the study.
+    storage = optuna.storages.JournalStorage(
+        optuna.storages.JournalFileStorage("./"+study_name+".log"),  # NFS path for distributed optimization
+    )
+
+    study = optuna.create_study(study_name="stable grasp study", storage=storage)  # Default is to minimize
+    study.optimize(objective, n_trials=50)  # Adjust number of trials based on available time and resources
+    
+    with open("best_trial.txt", "a") as file:
+        file.write(json.dumps(study.best_trial.params))
+        file.write("\n")
     print("Best parameters for stability:")
     print(study.best_trial.params)
 

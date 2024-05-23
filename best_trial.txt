@@ -1,0 +1,4 @@
+Best parameters for stability:
+{'gaussian_kernel': 27, 'median_kernel': 11, 'canny_threshold1': 19, 'canny_threshold2': 116, 'hough_rate': 181, 'line_threshold': 19}
+{"gaussian_kernel": 31, "median_kernel": 7, "canny_threshold1": 88, "canny_threshold2": 206, "hough_rate": 175, "line_threshold": 13}
+{"gaussian_kernel": 17, "median_kernel": 5, "canny_threshold1": 93, "canny_threshold2": 296, "hough_rate": 178, "line_threshold": 24}

@@ -49,15 +49,15 @@ def process_continuous_frames(d):
 
     try:
         while True:
-            rate = 194
+            rate = 181
             break_rate = 50
             threshold_increment = 5  # How much to change the threshold by in each iteration
             found_lines = False
-            gaussian = 21
-            median = 9
-            canny_threshold1=163
-            canny_threshold2= 264
-            line_threshold= 13
+            gaussian = 27
+            median = 11
+            canny_threshold1=19
+            canny_threshold2=116
+            line_threshold= 19
 
             frame = d.get_frame()
             height, width, channels = frame.shape
