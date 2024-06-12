@@ -5,6 +5,7 @@ from datetime import datetime
 import cv2
 import numpy as np
 import optuna
+import math
 from digit_interface import Digit
 import grasp_object_pybind
 import json
@@ -18,11 +19,32 @@ def remove_vertical_lines(lines):
             filtered_lines.append(line)
     return np.array(filtered_lines)
 
+def draw_line(lines, grey_image):
+    if lines is None or len(lines) == 0:
+        return
+    try:
+        # Find the line with the smallest rho value
+        closest_line = min(lines, key=lambda line: line[0][0])
+        #rho = sum(line[0][0] for line in lines) / len(lines)
+        #theta = sum(line[0][1] for line in lines) / len(lines)
+        rho, theta = closest_line[0]
+        a = math.cos(theta)
+        b = math.sin(theta)
+        x0 = a * rho
+        y0 = b * rho
+        pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+        pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+
+        # Draw the closest line
+        cv2.line(grey_image, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
+    except TypeError as e:
+        print(f"An error occurred: {e}")
+
 def calculate_penalty(lines,line_threshold):
     if lines is None or len(lines) == 0:
         return 1000
     elif len(lines) <= line_threshold:
-        return 0  # No penalty for 1 to 3 lines detected
+        return 0 
     else:
         return (len(lines) - line_threshold) * 10  # Adjust the penalty factor as needed
 
@@ -31,9 +53,10 @@ def measure_stability(d, gaussian_kernel, median_kernel, canny_threshold1, canny
     rhos = []
 
     for _ in range(20):
-        d.get_frame()
+        frame = d.get_frame()
 
     background_frame = d.get_frame()
+    cv2.imshow("Detected Lines (in red)",frame)
     blurred_base_frame = cv2.GaussianBlur(cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY), (gaussian_kernel, gaussian_kernel), 0)
 
     close_result =  grasp_object_pybind.grasp_object('172.31.1.17', 1, '0')
@@ -58,7 +81,10 @@ def measure_stability(d, gaussian_kernel, median_kernel, canny_threshold1, canny
                 closest_line = min(lines, key=lambda line: line[0][0])
                 rho, theta = closest_line[0]
                 rhos.append(rho)
-    
+        draw_line(lines, frame)
+        cv2.imshow("Detected Lines (in red)",frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     open_result = grasp_object_pybind.open_gripper('172.31.1.17')
     if open_result != 0:
@@ -91,16 +117,10 @@ def objective(trial):
     return variance
 
 def main():
-    dt = datetime.now()
+    storage = "sqlite:///optuna.db"
 
-    optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
-    study_name = str(dt)  # Unique identifier of the study.
-    storage = optuna.storages.JournalStorage(
-        optuna.storages.JournalFileStorage("./"+study_name+".log"),  # NFS path for distributed optimization
-    )
-
-    study = optuna.create_study(study_name="stable grasp study", storage=storage)  # Default is to minimize
-    study.optimize(objective, n_trials=50)  # Adjust number of trials based on available time and resources
+    study = optuna.create_study(study_name="stable grasp study", storage=storage, load_if_exists = True, direction = 'minimize')  # Default is to minimize
+    study.optimize(objective, n_trials=210)  # Adjust number of trials based on available time and resources
     
     with open("best_trial.txt", "a") as file:
         file.write(json.dumps(study.best_trial.params))
