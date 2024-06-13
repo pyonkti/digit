@@ -5,3 +5,9 @@ Best parameters for stability:
 {"gaussian_kernel": 19, "median_kernel": 7, "canny_threshold1": 195, "canny_threshold2": 275, "hough_rate": 151, "line_threshold": 26}
 {"gaussian_kernel": 19, "median_kernel": 7, "canny_threshold1": 18, "canny_threshold2": 167, "hough_rate": 129, "line_threshold": 17}
 {"gaussian_kernel": 19, "median_kernel": 7, "canny_threshold1": 18, "canny_threshold2": 167, "hough_rate": 129, "line_threshold": 17}
+{"gaussian_kernel": 25, "median_kernel": 11, "canny_threshold1": 125, "canny_threshold2": 272, "hough_rate": 71, "line_threshold": 14}
+{"gaussian_kernel": 15, "median_kernel": 3, "canny_threshold1": 93, "canny_threshold2": 146, "hough_rate": 56, "line_threshold": 24}
+{"gaussian_kernel": 15, "median_kernel": 11, "canny_threshold1": 192, "canny_threshold2": 261, "hough_rate": 66, "line_threshold": 30}
+{"gaussian_kernel": 29, "median_kernel": 3, "canny_threshold1": 16, "canny_threshold2": 79, "hough_rate": 61, "line_threshold": 5}
+{"gaussian_kernel": 13, "median_kernel": 9, "canny_threshold1": 127, "canny_threshold2": 164, "hough_rate": 59, "line_threshold": 10}
+{"gaussian_kernel": 13, "median_kernel": 9, "canny_threshold1": 127, "canny_threshold2": 164, "hough_rate": 59, "line_threshold": 10}

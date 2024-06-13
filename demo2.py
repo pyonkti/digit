@@ -8,17 +8,14 @@ import numpy as np
 
 def remove_vertical_lines(lines):
     filtered_lines = []
-    for line in lines:
-        rho, theta = line[0]
-        if np.pi / 180 * 10 < theta < np.pi / 180 * 170:
-            filtered_lines.append(line)
+    if lines is not None:
+        for line in lines:
+            rho, theta = line[0]
+            if np.pi / 180 * 10 < theta < np.pi / 180 * 170:
+                filtered_lines.append(line)
     return np.array(filtered_lines)
 
 def draw_line(lines, grey_image):
-    if lines is None or len(lines) == 0:
-        print("No lines found")
-        return  # No lines to process
-
     try:
         # Find the line with the smallest rho value
         closest_line = min(lines, key=lambda line: line[0][0])
@@ -36,41 +33,39 @@ def draw_line(lines, grey_image):
         cv2.line(grey_image, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
     except TypeError as e:
         print(f"An error occurred: {e}")
-        
+
 def process_continuous_frames(d):
     """
     Continuously captures and processes frames from the DIGIT device.
     """
+
+    gaussian = 13
+    median = 9
+    canny_threshold1=127
+    canny_threshold2=164
+    hough_rate = 59
+    line_threshold = 10
+    break_rate = 50
+    threshold_increment = 1  # How much to change the threshold by in each iteration
+
     for _ in range(20):
         d.get_frame()
 
     background_frame = d.get_frame()
-    blurred_base_frame = cv2.GaussianBlur(cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY), (3, 3), 0)
+    blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY), (gaussian, gaussian), 0), median)
 
     try:
         while True:
-            rate = 181
-            break_rate = 50
-            threshold_increment = 5  # How much to change the threshold by in each iteration
             found_lines = False
-            gaussian = 27
-            median = 11
-            canny_threshold1=19
-            canny_threshold2=116
-            line_threshold= 19
+            temp_hough = hough_rate
 
             frame = d.get_frame()
             height, width, channels = frame.shape
-            if not isinstance(frame, np.ndarray):
-                print("Error: Frame is not a valid numpy array.")
-                exit()
-
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             # Apply GaussianBlur to reduce noise and help in edge detection
             blurred_image = cv2.GaussianBlur(grey_image, (gaussian, gaussian), 0)
             blurred_image = cv2.medianBlur(blurred_image,median)
-
             if blurred_base_frame is not None:
                 blurred_image = blurred_image - blurred_base_frame
 
@@ -79,37 +74,35 @@ def process_continuous_frames(d):
 
 
             # First attempt to find lines with initial rate
-            lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
-
+            lines = cv2.HoughLines(edges, 1, np.pi / 180, temp_hough)
+            lines = remove_vertical_lines(lines)
+            
             # Adjust rate until lines are found, adhering to break_rate limit
-            while lines is None or len(remove_vertical_lines(lines)) == 0:
-                if rate >= break_rate:
-                    rate -= threshold_increment
-                    lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
-                else:
-                    break
-
-            # If lines are found, filter out vertical lines
-            if lines is not None:
-                lines = remove_vertical_lines(lines)
-                if len(lines) > 0:
-                    found_lines = True
+            if len(lines) == 0:
+                while temp_hough >= break_rate:
+                    temp_hough -= threshold_increment
+                    lines = cv2.HoughLines(edges, 1, np.pi / 180, temp_hough)
+                    lines = remove_vertical_lines(lines)
+                    if len(lines) == 0:
+                        continue
+                    else:
+                        found_lines = True
+                        break
 
             # If more than 3 lines are found, try to narrow it down by increasing the threshold
             if found_lines and len(lines) > line_threshold:
                 while len(lines) > line_threshold: 
-                    rate += threshold_increment
-                    temp_lines = cv2.HoughLines(edges, 1, np.pi / 180, rate)
-                    if temp_lines is None:
+                    temp_hough += threshold_increment
+                    temp_lines = cv2.HoughLines(edges, 1, np.pi / 180, temp_hough)
+                    temp_lines = remove_vertical_lines(temp_lines
+                                                       )
+                    if len(temp_lines) == 0:
                         draw_line(lines, frame)
                         break
-                    elif temp_lines is not None:
-                        temp_lines = remove_vertical_lines(temp_lines)
-                        if 0 < len(temp_lines) < line_threshold:
-                            lines = temp_lines  # Update lines with the filtered results
-                            draw_line(lines, frame)
-                        else:
-                            break  # Exit the loop if no lines are found in the current iteration
+                    elif 0 < len(temp_lines) < line_threshold:
+                        lines = temp_lines  # Update lines with the filtered results
+                        draw_line(lines, frame)
+
             elif found_lines and 0 < len(lines) < line_threshold:
                 draw_line(lines, frame)
 

@@ -1,0 +1,91 @@
+(digit) wei@OMEN-Desktop:~/Desktop/digit/digit$ python optimization.py
+[I 2024-06-13 18:20:34,351] Using an existing study with name 'stable grasp study' instead of creating a new one.
+18.181818181818187
+80.77068
+40.101851851851855
+[I 2024-06-13 18:20:44,981] Trial 70 finished with value: 139.05435332224425 and parameters: {'gaussian_kernel': 15, 'median_kernel': 5, 'canny_threshold1': 41, 'canny_threshold2': 106, 'hough_rate': 46, 'line_threshold': 3}. Best is trial 28 with value: 36.363636363636374.
+0.0
+56.134758
+73.19090909090909
+[I 2024-06-13 18:20:55,361] Trial 71 finished with value: 129.32566708651456 and parameters: {'gaussian_kernel': 17, 'median_kernel': 7, 'canny_threshold1': 103, 'canny_threshold2': 160, 'hough_rate': 48, 'line_threshold': 11}. Best is trial 28 with value: 36.363636363636374.
+18.181818181818187
+46.880363
+3.1944444444444446
+[I 2024-06-13 18:21:05,815] Trial 72 finished with value: 68.2566260906181 and parameters: {'gaussian_kernel': 17, 'median_kernel': 7, 'canny_threshold1': 135, 'canny_threshold2': 176, 'hough_rate': 52, 'line_threshold': 12}. Best is trial 28 with value: 36.363636363636374.
+9.090909090909038
+56.38834
+12.944954128440367
+[I 2024-06-13 18:21:16,204] Trial 73 finished with value: 78.4242032156873 and parameters: {'gaussian_kernel': 19, 'median_kernel': 7, 'canny_threshold1': 72, 'canny_threshold2': 153, 'hough_rate': 52, 'line_threshold': 11}. Best is trial 28 with value: 36.363636363636374.
+9.090909090909038
+64.659096
+38.596330275229356
+[I 2024-06-13 18:21:26,542] Trial 74 finished with value: 112.34633513029854 and parameters: {'gaussian_kernel': 17, 'median_kernel': 5, 'canny_threshold1': 24, 'canny_threshold2': 165, 'hough_rate': 40, 'line_threshold': 9}. Best is trial 28 with value: 36.363636363636374.
+18.181818181818187
+103.54787
+27.84259259259259
+[I 2024-06-13 18:21:36,981] Trial 75 finished with value: 149.57227759569983 and parameters: {'gaussian_kernel': 15, 'median_kernel': 7, 'canny_threshold1': 170, 'canny_threshold2': 125, 'hough_rate': 48, 'line_threshold': 13}. Best is trial 28 with value: 36.363636363636374.
+27.272727272727227
+50.708942
+4.906542056074766
+[I 2024-06-13 18:21:47,299] Trial 76 finished with value: 82.88821174213207 and parameters: {'gaussian_kernel': 17, 'median_kernel': 5, 'canny_threshold1': 122, 'canny_threshold2': 95, 'hough_rate': 48, 'line_threshold': 4}. Best is trial 28 with value: 36.363636363636374.
+9.090909090909038
+45.133404
+250.67889908256882
+[I 2024-06-13 18:21:57,650] Trial 77 finished with value: 304.903211951554 and parameters: {'gaussian_kernel': 17, 'median_kernel': 7, 'canny_threshold1': 14, 'canny_threshold2': 139, 'hough_rate': 32, 'line_threshold': 12}. Best is trial 28 with value: 36.363636363636374.
+36.363636363636374
+43.957985
+0.05660377358490566
+[I 2024-06-13 18:22:07,940] Trial 78 finished with value: 80.37822506153769 and parameters: {'gaussian_kernel': 19, 'median_kernel': 7, 'canny_threshold1': 84, 'canny_threshold2': 116, 'hough_rate': 51, 'line_threshold': 11}. Best is trial 28 with value: 36.363636363636374.
+472.72727272727275
+41.880577
+23.844827586206897
+[I 2024-06-13 18:22:18,452] Trial 79 finished with value: 538.452677400882 and parameters: {'gaussian_kernel': 15, 'median_kernel': 9, 'canny_threshold1': 33, 'canny_threshold2': 150, 'hough_rate': 57, 'line_threshold': 14}. Best is trial 28 with value: 36.363636363636374.
+18.181818181818187
+84.43772
+2.240740740740741
+[I 2024-06-13 18:22:28,718] Trial 80 finished with value: 104.86028017500034 and parameters: {'gaussian_kernel': 17, 'median_kernel': 5, 'canny_threshold1': 99, 'canny_threshold2': 169, 'hough_rate': 49, 'line_threshold': 9}. Best is trial 28 with value: 36.363636363636374.
+36.363636363636374
+46.24351
+0.9622641509433962
+[I 2024-06-13 18:22:39,048] Trial 81 finished with value: 83.56941171453094 and parameters: {'gaussian_kernel': 17, 'median_kernel': 7, 'canny_threshold1': 125, 'canny_threshold2': 77, 'hough_rate': 53, 'line_threshold': 5}. Best is trial 28 with value: 36.363636363636374.
+18.181818181818187
+124.54718
+20.60185185185185
+[I 2024-06-13 18:22:49,390] Trial 82 finished with value: 163.33085020945128 and parameters: {'gaussian_kernel': 17, 'median_kernel': 3, 'canny_threshold1': 113, 'canny_threshold2': 81, 'hough_rate': 46, 'line_threshold': 3}. Best is trial 28 with value: 36.363636363636374.
+72.72727272727275
+62.1178
+0.6176470588235294
+[I 2024-06-13 18:22:59,772] Trial 83 finished with value: 135.46272145235605 and parameters: {'gaussian_kernel': 19, 'median_kernel': 3, 'canny_threshold1': 133, 'canny_threshold2': 70, 'hough_rate': 54, 'line_threshold': 4}. Best is trial 28 with value: 36.363636363636374.
+45.45454545454541
+74.8834
+1.0761904761904761
+[I 2024-06-13 18:23:10,107] Trial 84 finished with value: 121.41413589411479 and parameters: {'gaussian_kernel': 17, 'median_kernel': 3, 'canny_threshold1': 146, 'canny_threshold2': 86, 'hough_rate': 52, 'line_threshold': 5}. Best is trial 28 with value: 36.363636363636374.
+27.272727272727227
+32.934807
+0.16822429906542055
+[I 2024-06-13 18:23:20,665] Trial 85 finished with value: 60.375758395523114 and parameters: {'gaussian_kernel': 17, 'median_kernel': 3, 'canny_threshold1': 129, 'canny_threshold2': 59, 'hough_rate': 51, 'line_threshold': 4}. Best is trial 28 with value: 36.363636363636374.
+27.272727272727227
+49.22417
+6.411214953271028
+[I 2024-06-13 18:23:31,111] Trial 86 finished with value: 82.9081129108127 and parameters: {'gaussian_kernel': 15, 'median_kernel': 7, 'canny_threshold1': 139, 'canny_threshold2': 56, 'hough_rate': 51, 'line_threshold': 3}. Best is trial 28 with value: 36.363636363636374.
+27.272727272727227
+77.99515
+28.42056074766355
+[I 2024-06-13 18:23:41,550] Trial 87 finished with value: 133.6884357254689 and parameters: {'gaussian_kernel': 19, 'median_kernel': 9, 'canny_threshold1': 120, 'canny_threshold2': 130, 'hough_rate': 43, 'line_threshold': 4}. Best is trial 28 with value: 36.363636363636374.
+18.181818181818187
+64.31267
+2.3425925925925926
+[I 2024-06-13 18:23:51,887] Trial 88 finished with value: 84.83707862109047 and parameters: {'gaussian_kernel': 15, 'median_kernel': 9, 'canny_threshold1': 91, 'canny_threshold2': 71, 'hough_rate': 49, 'line_threshold': 6}. Best is trial 28 with value: 36.363636363636374.
+90.90909090909093
+48.143547
+10.56
+[I 2024-06-13 18:24:02,237] Trial 89 finished with value: 149.6126379671964 and parameters: {'gaussian_kernel': 17, 'median_kernel': 3, 'canny_threshold1': 154, 'canny_threshold2': 157, 'hough_rate': 57, 'line_threshold': 4}. Best is trial 28 with value: 36.363636363636374.
+663.6363636363636
+61.634697
+0.0
+[I 2024-06-13 18:24:12,504] Trial 90 finished with value: 725.2710605968128 and parameters: {'gaussian_kernel': 13, 'median_kernel': 5, 'canny_threshold1': 22, 'canny_threshold2': 63, 'hough_rate': 58, 'line_threshold': 10}. Best is trial 28 with value: 36.363636363636374.
+18.181818181818187
+86.766335
+4.787037037037037
+[I 2024-06-13 18:24:22,889] Trial 91 finished with value: 109.73518975254663 and parameters: {'gaussian_kernel': 17, 'median_kernel': 3, 'canny_threshold1': 128, 'canny_threshold2': 94, 'hough_rate': 53, 'line_threshold': 5}. Best is trial 28 with value: 36.363636363636374.
+
