@@ -87,9 +87,9 @@ def measure_stability(d, gaussian_kernel, median_kernel, canny_threshold1, canny
     # Combine variance or use another metric if more appropriate
     if len(rhos) > 0:
         rho_std = np.std(rhos)
-        print(1000*(1-len(rhos)/frame_count))
-        print(rho_std)
-        print(sum(lines_count)/len(lines_count))
+        print(f"consequtiveness: {1000*(1-len(rhos)/frame_count)}")
+        print(f"standard variation of rho: {rho_std}")
+        print(f"number of average exceeded lines: {sum(lines_count)/len(lines_count)}")
         return 1000*(1-len(rhos)/frame_count) + rho_std + sum(lines_count)/len(lines_count)  # Objective to minimize
     else:
         return 1000

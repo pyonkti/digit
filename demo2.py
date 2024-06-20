@@ -32,7 +32,7 @@ def draw_line(lines, grey_image):
         # Draw the closest line
         cv2.line(grey_image, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
     except TypeError as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred while drawing lines: {e}")
 
 def process_continuous_frames(d):
     """
@@ -41,9 +41,9 @@ def process_continuous_frames(d):
 
     gaussian = 13
     median = 9
-    canny_threshold1=127
-    canny_threshold2=164
-    hough_rate = 59
+    canny_threshold1=55
+    canny_threshold2=96
+    hough_rate = 56
     line_threshold = 10
     break_rate = 50
     threshold_increment = 1  # How much to change the threshold by in each iteration
@@ -86,25 +86,26 @@ def process_continuous_frames(d):
                     if len(lines) == 0:
                         continue
                     else:
-                        found_lines = True
+                        draw_line(lines, frame)
                         break
+            else:
+                draw_line(lines, frame)
 
             # If more than 3 lines are found, try to narrow it down by increasing the threshold
-            if found_lines and len(lines) > line_threshold:
-                while len(lines) > line_threshold: 
-                    temp_hough += threshold_increment
-                    temp_lines = cv2.HoughLines(edges, 1, np.pi / 180, temp_hough)
-                    temp_lines = remove_vertical_lines(temp_lines
-                                                       )
-                    if len(temp_lines) == 0:
-                        draw_line(lines, frame)
-                        break
-                    elif 0 < len(temp_lines) < line_threshold:
-                        lines = temp_lines  # Update lines with the filtered results
-                        draw_line(lines, frame)
+            #if found_lines and len(lines) > line_threshold:
+                #while len(lines) > line_threshold: 
+                    #temp_hough += threshold_increment
+                    #temp_lines = cv2.HoughLines(edges, 1, np.pi / 180, temp_hough)
+                    #temp_lines = remove_vertical_lines(temp_lines)
+                    #if len(temp_lines) <= 0:
+                        #draw_line(lines, frame)
+                        #break
+                    #elif 0 < len(temp_lines) < line_threshold:
+                        #lines = temp_lines  # Update lines with the filtered results
+                        #draw_line(lines, frame)
 
-            elif found_lines and 0 < len(lines) < line_threshold:
-                draw_line(lines, frame)
+            #elif found_lines and 0 < len(lines) < line_threshold:
+                #draw_line(lines, frame)
 
             tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
 
