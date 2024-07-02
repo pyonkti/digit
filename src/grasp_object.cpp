@@ -49,7 +49,7 @@ int grasp_object(char* ip_address, int homing_flag, char* width) {
 int open_gripper(char* ip_address){
 try { 
     franka::Gripper gripper(ip_address);
-    gripper.homing();
+    gripper.move(0.08,1);
 
 } catch (franka::Exception const& e) {
     std::cout << e.what() << std::endl;
