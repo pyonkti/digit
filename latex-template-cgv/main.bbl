@@ -1,0 +1,264 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{ynt/global//global/global}
+    \entry{Foley1982}{book}{}
+      \name{author}{2}{}{%
+        {{hash=61151e3691774bd7a6ecf72e3c15d034}{%
+           family={Foley},
+           familyi={F\bibinitperiod},
+           given={James\bibnamedelima D.},
+           giveni={J\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=1a43815572691c3036032556ca985ab6}{%
+           family={Van\bibnamedelima Dam},
+           familyi={V\bibinitperiod\bibinitdelim D\bibinitperiod},
+           given={Andries},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {USA}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley Longman Publishing Co., Inc.}%
+      }
+      \strng{namehash}{5d2026456dc0a8b04f20062901eeb183}
+      \strng{fullhash}{5d2026456dc0a8b04f20062901eeb183}
+      \strng{bibnamehash}{5d2026456dc0a8b04f20062901eeb183}
+      \strng{authorbibnamehash}{5d2026456dc0a8b04f20062901eeb183}
+      \strng{authornamehash}{5d2026456dc0a8b04f20062901eeb183}
+      \strng{authorfullhash}{5d2026456dc0a8b04f20062901eeb183}
+      \field{labelalpha}{FV82}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{0201144689}
+      \field{title}{Fundamentals of Interactive Computer Graphics}
+      \field{year}{1982}
+    \endentry
+    \entry{Milder2006}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{hash=e78d2b3fb9e524baeeae523193eff0a2}{%
+           family={Milder},
+           familyi={M\bibinitperiod},
+           given={Peter\bibnamedelima A.},
+           giveni={P\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=ed0968f33daf36ae7577303e24b5a504}{%
+           family={Ahmad},
+           familyi={A\bibinitperiod},
+           given={Mohammad},
+           giveni={M\bibinitperiod}}}%
+        {{hash=9880b5c3ff04162daf0a04a66e216f68}{%
+           family={Hoe},
+           familyi={H\bibinitperiod},
+           given={James\bibnamedelima C.},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=8f4f7b9935992aa7a20147800e695b1e}{%
+           family={Püschel},
+           familyi={P\bibinitperiod},
+           given={Markus},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Monterey, California, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{ff503f5df3ff3f2398333872f826a29e}
+      \strng{fullhash}{3b7b3c48460c0f39e3e3787dbd659249}
+      \strng{bibnamehash}{ff503f5df3ff3f2398333872f826a29e}
+      \strng{authorbibnamehash}{ff503f5df3ff3f2398333872f826a29e}
+      \strng{authornamehash}{ff503f5df3ff3f2398333872f826a29e}
+      \strng{authorfullhash}{3b7b3c48460c0f39e3e3787dbd659249}
+      \field{labelalpha}{Mil+06}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 2006 ACM/SIGDA 14th International Symposium on Field Programmable Gate Arrays}
+      \field{isbn}{1595932925}
+      \field{series}{FPGA '06}
+      \field{title}{Fast and Accurate Resource Estimation of Automatically Generated Custom DFT IP Cores}
+      \field{year}{2006}
+      \field{pages}{211\bibrangedash 220}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1145/1117201.1117232
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/1117201.1117232
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/1117201.1117232
+      \endverb
+      \keyw{design generator,FPGA resource estimation,discrete fourier transform,IP}
+    \endentry
+    \entry{Mike2020}{article}{}
+      \name{author}{12}{}{%
+        {{hash=8e572e053b9e2d0e291c58afee0d4ef8}{%
+           family={Lambeta},
+           familyi={L\bibinitperiod},
+           given={Mike},
+           giveni={M\bibinitperiod}}}%
+        {{hash=de65b2e7b30cd104c19958da74769b24}{%
+           family={Chou},
+           familyi={C\bibinitperiod},
+           given={Po-Wei},
+           giveni={P\bibinithyphendelim W\bibinitperiod}}}%
+        {{hash=e8cbb9863284d5792a549c55ede4241d}{%
+           family={Tian},
+           familyi={T\bibinitperiod},
+           given={Stephen},
+           giveni={S\bibinitperiod}}}%
+        {{hash=cc98893b6272e9f898274231af5ce0fd}{%
+           family={Yang},
+           familyi={Y\bibinitperiod},
+           given={Brian},
+           giveni={B\bibinitperiod}}}%
+        {{hash=56716a6072771ab572febbef5742e6ef}{%
+           family={Maloon},
+           familyi={M\bibinitperiod},
+           given={Benjamin},
+           giveni={B\bibinitperiod}}}%
+        {{hash=7f0a7103fd2a42207e8a6e5addee0dd5}{%
+           family={Most},
+           familyi={M\bibinitperiod},
+           given={Victoria\bibnamedelima Rose},
+           giveni={V\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+        {{hash=72988a9d5f1036cd38daff02706075bb}{%
+           family={Stroud},
+           familyi={S\bibinitperiod},
+           given={Dave},
+           giveni={D\bibinitperiod}}}%
+        {{hash=9926c84a4513ee3ba24e96b14984c2c5}{%
+           family={Santos},
+           familyi={S\bibinitperiod},
+           given={Raymond},
+           giveni={R\bibinitperiod}}}%
+        {{hash=5a4c10a2eab875989c6db344e2e1fc56}{%
+           family={Byagowi},
+           familyi={B\bibinitperiod},
+           given={Ahmad},
+           giveni={A\bibinitperiod}}}%
+        {{hash=6967e111a329dd8ad17e1cfea1f6828f}{%
+           family={Kammerer},
+           familyi={K\bibinitperiod},
+           given={Gregg},
+           giveni={G\bibinitperiod}}}%
+        {{hash=cd27d3d228b115c84bc1d88310a81f02}{%
+           family={Jayaraman},
+           familyi={J\bibinitperiod},
+           given={Dinesh},
+           giveni={D\bibinitperiod}}}%
+        {{hash=864584c60b808b517f2a06c664ec116a}{%
+           family={Calandra},
+           familyi={C\bibinitperiod},
+           given={Roberto},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{1d292ccc4b2a315a9d31275af19d9900}
+      \strng{fullhash}{3efef34bd4299807dbfbbafaefdf1a19}
+      \strng{bibnamehash}{1d292ccc4b2a315a9d31275af19d9900}
+      \strng{authorbibnamehash}{1d292ccc4b2a315a9d31275af19d9900}
+      \strng{authornamehash}{1d292ccc4b2a315a9d31275af19d9900}
+      \strng{authorfullhash}{3efef34bd4299807dbfbbafaefdf1a19}
+      \field{labelalpha}{Lam+20}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{title}{DIGIT: A Novel Design for a Low-Cost Compact High-Resolution Tactile Sensor with Application to In-Hand Manipulation}
+      \field{year}{2020}
+      \verb{doi}
+      \verb 10.1109/LRA.2020.2977257
+      \endverb
+      \verb{eprint}
+      \verb 2005.14679
+      \endverb
+    \endentry
+    \entry{IVANIUK2022}{article}{}
+      \name{author}{6}{}{%
+        {{hash=3c28f6c119fb412167f027284c50ea20}{%
+           family={Ivaniuk},
+           familyi={I\bibinitperiod},
+           given={Egor},
+           giveni={E\bibinitperiod}}}%
+        {{hash=d225efc214dc8ddf8bc673dc7a46058d}{%
+           family={{Friedrich Eichenauer}},
+           familyi={F\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+        {{hash=6c6ab989abdd7efb0c00e7137cbea13b}{%
+           family={Tošić},
+           familyi={T\bibinitperiod},
+           given={Zlata},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=6346898b21792c539e6cbbc762b4e8ce}{%
+           family={Müller},
+           familyi={M\bibinitperiod},
+           given={Steffen},
+           giveni={S\bibinitperiod}}}%
+        {{hash=25d9404dd618735597e8965c82de45f1}{%
+           family={Lordick},
+           familyi={L\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod}}}%
+        {{hash=4d74b5abdb39949261be7c6c4af27ce3}{%
+           family={Mechtcherine},
+           familyi={M\bibinitperiod},
+           given={Viktor},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{dca5be79eab056efc856c77ef49f532e}
+      \strng{fullhash}{b63e842caeb4e308ab5543c763de0993}
+      \strng{bibnamehash}{dca5be79eab056efc856c77ef49f532e}
+      \strng{authorbibnamehash}{dca5be79eab056efc856c77ef49f532e}
+      \strng{authornamehash}{dca5be79eab056efc856c77ef49f532e}
+      \strng{authorfullhash}{b63e842caeb4e308ab5543c763de0993}
+      \field{labelalpha}{Iva+22}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Despite all their advantages, load-bearing concrete shell structures with double curvatures are not frequently in use. The main reason is the complexity of their construction. In such a context, this article starts with a brief, critical review of existing technologies while their pros and cons are highlighted. Against that background, the authors propose a new approach for the highly automated fabrication of gridshell structures from variable modules reinforced with textile meshes. To demonstrate the feasibility of such a new technology, a demonstrator called ConDIT 1.0, a sphere-like shell structure composed of several frames, was designed and built. The frame modules were fabricated automatically using extrusion-based 3D printing and a printable, strain-hardening cement-based composite (SHCC). This article presents the design of ConDIT 1.0, the mechanical material characterization of printed SHCC, the technology of module production, the results of geometry verification for print modules using 3D scanning, and the procedure for the demonstrator’s assembly.}
+      \field{issn}{0264-1275}
+      \field{journaltitle}{Materials & Design}
+      \field{title}{3D printing and assembling of frame modules using printable strain-hardening cement-based composites (SHCC)}
+      \field{volume}{219}
+      \field{year}{2022}
+      \field{pages}{110757}
+      \range{pages}{1}
+      \verb{doi}
+      \verb https://doi.org/10.1016/j.matdes.2022.110757
+      \endverb
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/pii/S0264127522003793
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/pii/S0264127522003793
+      \endverb
+      \keyw{Concrete frames,Modules,Gridshell structures,3D concrete printing,Digital construction,SHCC,ECC}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
