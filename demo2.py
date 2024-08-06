@@ -1,10 +1,11 @@
 import re
+import os
 import math
 from matplotlib import pyplot as plt
 from digit_interface import Digit
-from digit_interface import DigitHandler
 import cv2
 import numpy as np
+from datetime import datetime
 
 class FIFOQueue:
     def __init__(self, size):
@@ -128,6 +129,8 @@ def process_continuous_frames(d):
     minLineLength= 117
     maxLineGap= 51
     parallelogram_points = None
+    output_dir = "dataset"
+    os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
     edge_rate_queue = FIFOQueue(size=10)
 
     #skip first 20 frames for camera to adjust its white balance
@@ -141,6 +144,8 @@ def process_continuous_frames(d):
         while True:
             found_lines = False
             temp_hough = hough_rate
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_path = os.path.join(output_dir, f"detected_lines_{timestamp}.png")
 
             frame = d.get_frame()
             height, width, channels = frame.shape
@@ -182,9 +187,11 @@ def process_continuous_frames(d):
                     if len(lines) == 0:
                         continue
                     else:
+                        cv2.imwrite(output_path, frame)
                         parallelogram_points = draw_line(lines, frame, edges)
                         break
             else:
+                cv2.imwrite(output_path, frame)
                 parallelogram_points = draw_line(lines, frame, edges)
 
             # If more than 3 lines are found, try to narrow it down by increasing the threshold
