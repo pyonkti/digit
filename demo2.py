@@ -227,7 +227,7 @@ def process_continuous_frames(d):
         cv2.destroyAllWindows()
 
 
-d = Digit("D20782") # Unique serial number
+d = Digit("D20790") # Unique serial number
 d.connect()
 process_continuous_frames(d)
 d.disconnect()
