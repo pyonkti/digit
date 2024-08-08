@@ -1,4 +1,5 @@
 import torch
+import os
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
@@ -23,8 +24,13 @@ model = UNet(in_channels=3, out_channels=1).cuda()
 criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
+checkpoint_path = 'unet_line_detection.pth'
+if os.path.exists(checkpoint_path):
+    model.load_state_dict(torch.load(checkpoint_path))
+    print("Checkpoint loaded. Continuing training...")
+
 # Training loop
-num_epochs = 8
+num_epochs = 20
 for epoch in range(num_epochs):
     model.train()
     for images, masks in dataloader:
