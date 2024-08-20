@@ -1,0 +1,3 @@
+[submodule "fast-slic"]
+	path = fast-slic
+	url = https://github.com/Algy/fast-slic.git
