@@ -1,4 +1,3 @@
-import re
 import os
 import math
 from matplotlib import pyplot as plt
@@ -14,6 +13,15 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
 from edge_detection_autoencoder import UNet
+from utils.draw_lines import (
+    calculate_rho_theta,
+    line_to_image_edges,
+    draw_parallelogram_around_line,
+    draw_line_and_parallelogram,
+    select_best_line,
+    score_line,
+    remove_vertical_lines
+)
 
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
@@ -44,79 +52,6 @@ class FIFOQueue:
     
     def clear(self):
         self.queue = []
-
-def remove_vertical_lines(lines):
-    filtered_lines = []
-    if lines is not None:
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            delta_y = y2 - y1
-            delta_x = x2 - x1
-
-            # Calculate the angle in radians
-            theta_radians = math.atan2(delta_y, delta_x)
-
-            # Convert the angle to degrees
-            theta_degrees = math.degrees(theta_radians)
-            if np.pi / 180 * 10 < theta_degrees < np.pi / 180 * 170:
-                filtered_lines.append(line)
-    return np.array(filtered_lines)
-
-def calculate_rho_theta(x1, y1, x2, y2):
-    A = y2 - y1
-    B = x1 - x2
-    C = x2 * y1 - x1 * y2
-
-    rho = abs(C) / math.sqrt(A**2 + B**2)
-    theta = math.atan2(B, A)  # Correct calculation of theta
-    if theta < 0:
-        theta += np.pi  # Adjust theta to be in the range [0, pi]
-
-    return rho, theta
-
-def draw_line(lines, frame):
-    try:
-        # Find the longest line segment (or any other criteria)
-        longest_line = max(lines, key=lambda line: np.linalg.norm((line[0][2] - line[0][0], line[0][3] - line[0][1])))
-        x1, y1, x2, y2 = longest_line[0]
-
-        # Calculate rho and theta from the endpoints
-        rho, theta = calculate_rho_theta(x1, y1, x2, y2)
-        a = math.cos(theta)
-        b = math.sin(theta)
-
-        length = max(frame.shape)  # Use the maximum dimension of the image
-        x0 = (x1 + x2) / 2
-        y0 = (y1 + y2) / 2
-        pt1 = (int(x0 + length * (-b)), int(y0 + length * (a)))
-        pt2 = (int(x0 - length * (-b)), int(y0 - length * (a)))
-
-        if b!= 0:
-            parallelogram_points = np.array([
-                [0, int((rho-10)/b)],
-                [0, int((rho+10)/b)],
-                [480, int((rho-480*a+10)/b)],
-                [480, int((rho-480*a-10)/b)]
-            ])
-        else:
-            parallelogram_points = np.array([
-                [0, rho-10],
-                [0, rho+10],
-                [480, rho-10],
-                [480, rho+10]
-            ])
-        draw_parallelogram(parallelogram_points, frame)
-        # Draw the longest line
-        cv2.line(frame, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
-    except TypeError as e:
-        print(f"An error occurred while drawing lines: {e}")
-    return parallelogram_points
-
-def draw_parallelogram(parallelogram_points, image):
-    try:
-        cv2.polylines(image, [parallelogram_points], isClosed=True, color=(255, 255, 255), thickness=2)
-    except TypeError as e:
-        print(f"An error occurred while drawing parallelogram_: {e}")
 
 def count_edge_pixels_in_parallelogram(output_resized, vertices):
     mask = np.zeros_like(output_resized)
@@ -191,17 +126,16 @@ def process_continuous_frames(d):
 
             # Adjust rate until lines are found, adhering to break_rate limit
             if len(lines) == 0:
-                while temp_hough >= break_rate:
+                while temp_hough > break_rate:
                     temp_hough -= threshold_increment
                     lines = cv2.HoughLinesP(output_resized, 1, np.pi / 180, temp_hough, None, minLineLength, maxLineGap)
                     lines = remove_vertical_lines(lines)
-                    if len(lines) == 0:
-                        continue
-                    else:
-                        parallelogram_points = draw_line(lines, original_image_bgr)
+
+                    if len(lines) > 0:
+                        parallelogram_points = draw_line_and_parallelogram(lines, original_image_bgr, output_resized, width=10)
                         break
             else:
-                parallelogram_points = draw_line(lines, original_image_bgr)
+                parallelogram_points = draw_line_and_parallelogram(lines, original_image_bgr, output_resized, width=10)
 
             tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
 
