@@ -1,9 +1,9 @@
 import os
-from matplotlib import pyplot as plt
 from digit_interface import Digit
 import cv2
+import torch
 import numpy as np
-from fast_slic import Slic
+from datetime import datetime
 from utils.draw_lines import (
     calculate_rho_theta,
     line_to_image_edges,
@@ -13,7 +13,7 @@ from utils.draw_lines import (
     score_line,
     remove_vertical_lines
 )
-from scipy.ndimage import convolve
+from utils.edge import draw_edge
 
 class FIFOQueue:
     def __init__(self, size):
@@ -51,39 +51,39 @@ def process_continuous_frames(d):
     """
     Continuously captures and processes frames from the DIGIT device.
     """
-    hough_rate = 50
+
+    hough_rate = 44
     #line_threshold = 10
-    break_rate = 10
+    break_rate = 35
     threshold_increment = 1  # How much to change the threshold by in each iteration
-    minLineLength= 50
-    maxLineGap= 10
+    minLineLength= 117
+    maxLineGap= 51
     parallelogram_points = None
     output_dir = "dataset"
     os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
     edge_rate_queue = FIFOQueue(size=10)
+    
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+
     #skip first 20 frames for camera to adjust its white balance
     for _ in range(20):
         d.get_frame()
 
+    background_frame = d.get_frame()
+
     try:
         while True:
             temp_hough = hough_rate
+
             frame = d.get_frame()
             height, width, channels = frame.shape
-            slic = Slic(num_components=2, compactness=10)
-            assignment = slic.iterate(frame)
+            processed_frame = frame - background_frame + 128
 
-            edges = np.zeros((height, width), dtype=np.uint8)
+            edges = draw_edge(processed_frame,device)
 
-            gradient_x = np.abs(np.diff(assignment, axis=1))
-            gradient_y = np.abs(np.diff(assignment, axis=0))
-
-            gradient_x = np.pad(gradient_x, ((0, 0), (0, 1)), mode='constant', constant_values=0)
-            gradient_y = np.pad(gradient_y, ((0, 1), (0, 0)), mode='constant', constant_values=0)
-
-            edges = np.clip(gradient_x + gradient_y, 0, 1) * 255
-            edges = edges.astype(np.uint8)
-            
             if parallelogram_points is not None:
                 rate = count_edge_pixels_in_parallelogram(edges,parallelogram_points)
                 if  edge_rate_queue.__len__() < 10:
@@ -98,11 +98,11 @@ def process_continuous_frames(d):
                     else:
                         edge_rate_queue.enqueue(rate)
 
-            lines = cv2.HoughLinesP(edges, 1, np.pi / 180, hough_rate, None, minLineLength, maxLineGap)
+            # First attempt to find lines with initial rate
+            lines = cv2.HoughLinesP(edges, 1, np.pi / 180, temp_hough, None, minLineLength, maxLineGap)
             lines = remove_vertical_lines(lines)
-
-            temp_hough = hough_rate
-
+            
+            # Adjust rate until lines are found, adhering to break_rate limit
             if len(lines) == 0:
                 while temp_hough > break_rate:
                     temp_hough -= threshold_increment
@@ -115,11 +115,10 @@ def process_continuous_frames(d):
             else:
                 parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
 
-            
             tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
 
             # Place images into the layout
-            tiled_layout[0:height, 0:width] = frame
+            tiled_layout[0:height, 0:width] = processed_frame
             tiled_layout[0:height, width:width*2] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
             cv2.imshow("Detected Lines (in red)",tiled_layout)
