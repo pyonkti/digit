@@ -3,6 +3,7 @@ from digit_interface import Digit
 import cv2
 import numpy as np
 from datetime import datetime
+from skimage.metrics import structural_similarity as ssim
 from utils.draw_lines import (
     calculate_rho_theta,
     line_to_image_edges,
@@ -38,6 +39,14 @@ class FIFOQueue:
     def clear(self):
         self.queue = []
 
+def compare_images(imageA, imageB):
+    assert imageA.shape == imageB.shape, "Images must have the same dimensions"
+    
+    ssim_value, _ = ssim(imageA, imageB, full=True)
+
+    return ssim_value
+
+
 def count_edge_pixels_in_parallelogram(edges, vertices):
     mask = np.zeros_like(edges)
     cv2.fillPoly(mask, [vertices], 255)
@@ -52,8 +61,8 @@ def process_continuous_frames(d):
 
     gaussian = 23
     median = 5
-    canny_threshold1=160
-    canny_threshold2=183
+    canny_threshold1=20
+    canny_threshold2=70
     hough_rate = 44
     #line_threshold = 10
     break_rate = 35
@@ -86,11 +95,28 @@ def process_continuous_frames(d):
             # Apply GaussianBlur to reduce noise and help in edge detection
             blurred_image = cv2.GaussianBlur(grey_image, (gaussian, gaussian), 0)
             blurred_image = cv2.medianBlur(blurred_image,median)
-            if blurred_base_frame is not None:
-                blurred_image = blurred_image - blurred_base_frame
+            if blurred_base_frame is not None:  
+                ssim_value = compare_images(blurred_base_frame,blurred_image)
+                blurred_image = cv2.absdiff(blurred_image, blurred_base_frame)
+                clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+                enhanced_image = clahe.apply(blurred_image)
+
+            if parallelogram_points is None and ssim_value > 0.92:
+                edges = np.zeros((height, width, channels), dtype=np.uint8)
+                tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
+                # Place images into the layout
+                tiled_layout[0:height, 0:width] = frame
+                tiled_layout[0:height, width:width*2] = cv2.cvtColor(blurred_image, cv2.COLOR_GRAY2BGR)
+                tiled_layout[0:height, width*2:width*3] = edges
+
+                cv2.imshow("Detected Lines (in red)",tiled_layout)
+                # Break the loop if 'q' is pressed
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+                continue
 
             # Canny Edge Detection
-            edges = cv2.Canny(image=blurred_image, threshold1=canny_threshold1, threshold2=canny_threshold2) # Canny Edge Detection
+            edges = cv2.Canny(image=enhanced_image, threshold1=canny_threshold1, threshold2=canny_threshold2) # Canny Edge Detection
 
             if parallelogram_points is not None:
                 rate = count_edge_pixels_in_parallelogram(edges,parallelogram_points)
@@ -155,8 +181,8 @@ def process_continuous_frames(d):
     finally:
         cv2.destroyAllWindows()
 
-
-d = Digit("D20790") # Unique serial number
-d.connect()
-process_continuous_frames(d)
-d.disconnect()
+if __name__ == '__main__':
+    d = Digit("D20812") # Unique serial number
+    d.connect()
+    process_continuous_frames(d)
+    d.disconnect()
