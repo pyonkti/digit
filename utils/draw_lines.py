@@ -107,6 +107,51 @@ def draw_parallelogram_around_line(x1, y1, x2, y2, width, image):
 
     return points
 
+def lightglue_detection_area(lines,frame):
+    try:
+        # Find the best line segment
+        best_line = select_best_line(lines, frame.shape)
+        x1, y1, x2, y2 = best_line[0]
+
+        # Calculate the points where the line crosses the image edges
+        pt1, pt2 = line_to_image_edges(x1, y1, x2, y2, frame)
+
+        # Calculate the direction vector of the line
+        x1 = pt1[0] 
+        y1=pt1[1]
+        x2=pt2[0]
+        y2=pt2[1]
+
+        dx = x2 - x1
+        dy = y2 - y1
+
+        # Normalize the direction vector
+        length = math.sqrt(dx ** 2 + dy ** 2)
+        ux = dx / length
+        uy = dy / length
+
+        # Perpendicular vector to the line
+        perp_ux = -uy
+        perp_uy = ux
+
+        # Calculate the four points of the parallelogram
+        offset_y = perp_uy * 80
+
+        pt1 = (int(x1), int(y1 + offset_y))
+        pt2 = (int(x2), int(y2 + offset_y))
+        pt3 = (int(x2), int(y2))
+        pt4 = (int(x1), int(y1))
+
+        # Draw the parallelogram on the image
+        points = np.array([pt1, pt2, pt3, pt4], np.int32)
+        #cv2.polylines(frame, [points], isClosed=True, color=(0, 255, 0), thickness=2)
+
+    except TypeError as e:
+        print(f"An error occurred while marking detection area: {e}")
+        points = None
+
+    return points
+
 def draw_line_and_parallelogram(lines, frame, edges, width=10):
     try:
         # Find the best line segment
