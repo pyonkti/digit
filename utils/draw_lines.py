@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import cv2
+from skimage.metrics import structural_similarity as ssim
 
 def remove_vertical_lines(lines):
     filtered_lines = []
@@ -165,12 +166,21 @@ def draw_line_and_parallelogram(lines, frame, edges, width=10):
         cv2.line(frame, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
 
         # Draw the parallelogram around the extended line
-        parallelogram_points = draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, frame)
-        draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, edges)
+        #parallelogram_points = draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, frame)
+        #draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, edges)
 
     except TypeError as e:
         print(f"An error occurred while drawing lines: {e}")
         parallelogram_points = None
 
     return parallelogram_points
+
+def compare_images(imageA, imageB):
+    assert imageA.shape == imageB.shape, "Images must have the same dimensions"
+    
+    ssim_value, _ = ssim(imageA, imageB, full=True)
+
+    return ssim_value
+
+
 

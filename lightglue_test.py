@@ -127,8 +127,8 @@ if __name__ =='__main__':
     extractor = SuperPoint(max_num_keypoints=1024).eval().cuda()  # load the extractor
     matcher = LightGlue(features='superpoint', depth_confidence=0.9, width_confidence=0.95).eval().cuda()  # load the matcher
 
-    image0 = cv2.imread('/root/digit/screenshot/consecutive1/2024-03-08 16-49-15180.png')
-    image1 = cv2.imread('/root/digit/screenshot/consecutive1/2024-03-08 16-49-15190.png')
+    image0 = cv2.imread('/root/digit/edge_detection_autoencoder/dataset/images/detected_lines_20240806_173151.png')
+    image1 = cv2.imread('/root/digit/edge_detection_autoencoder/dataset/images/detected_lines_20240806_173152.png')
     
     area0 = edgeDetector.locate_edge(image0)
     area1 = edgeDetector.locate_edge(image1)

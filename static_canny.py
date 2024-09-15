@@ -75,7 +75,7 @@ def process_continuous_frames():
         try:
             temp_hough = hough_rate
 
-            frame = cv2.imread('/root/digit/edge_detection_autoencoder/dataset/images/detected_lines_20240806_172602.png')
+            frame = cv2.imread('/root/digit/edge_detection_autoencoder/dataset/images/detected_lines_20240806_172610.png')
             height, width, channels = frame.shape
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -134,6 +134,9 @@ def process_continuous_frames():
             cv2.imshow("Detected Lines (in red)",tiled_layout)
             # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                if parallelogram_points is not None:
+                    rate = count_edge_pixels_in_parallelogram(edges,parallelogram_points)
+                    print(rate)
                 cv2.destroyAllWindows()
                 break
         except Exception as e:

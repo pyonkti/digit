@@ -1,19 +1,16 @@
 import os
-from matplotlib import pyplot as plt
 from digit_interface import Digit
 import cv2
 import numpy as np
+from datetime import datetime
 from fast_slic import Slic
+from utils.match import LightGlueMatcher
 from utils.draw_lines import (
-    calculate_rho_theta,
-    line_to_image_edges,
-    draw_parallelogram_around_line,
     draw_line_and_parallelogram,
-    select_best_line,
-    score_line,
-    remove_vertical_lines
+    remove_vertical_lines,
+    lightglue_detection_area,
+    compare_images
 )
-from scipy.ndimage import convolve
 
 class FIFOQueue:
     def __init__(self, size):
@@ -51,25 +48,64 @@ def process_continuous_frames(d):
     """
     Continuously captures and processes frames from the DIGIT device.
     """
+    gaussian = 23
+    median = 5
     hough_rate = 50
-    #line_threshold = 10
     break_rate = 10
-    threshold_increment = 1  # How much to change the threshold by in each iteration
-    minLineLength= 50
-    maxLineGap= 10
+    threshold_increment = 1
+    minLineLength = 117
+    maxLineGap = 51
     parallelogram_points = None
+    match_counter = 10
+    lightGlue_area = None
+    matchFrame = None
+    detach_flag = False
+    detach_counter = 30
+    matcher = LightGlueMatcher()
     output_dir = "dataset"
-    os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True) 
     edge_rate_queue = FIFOQueue(size=10)
+
     #skip first 20 frames for camera to adjust its white balance
     for _ in range(20):
         d.get_frame()
 
+    background_frame = d.get_frame()
+    blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY), (gaussian, gaussian), 0), median)
+
     try:
         while True:
             temp_hough = hough_rate
+            former_parallelogram_points = parallelogram_points
             frame = d.get_frame()
             height, width, channels = frame.shape
+
+            grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            blurred_image = cv2.GaussianBlur(grey_image, (gaussian, gaussian), 0)
+            blurred_image = cv2.medianBlur(blurred_image,median)
+
+            if blurred_base_frame is not None:  
+                ssim_value = compare_images(blurred_base_frame,blurred_image)
+
+            if former_parallelogram_points is None and ssim_value > 0.92:
+                if detach_flag and detach_counter>0:
+                    detach_counter -= 1
+                elif detach_flag:
+                    detach_flag = False
+                    detach_counter = 30
+                    print('Component detached')
+
+                edges = np.zeros((height, width, channels), dtype=np.uint8)
+                
+                tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
+                tiled_layout[0:height, 0:width] = frame
+                tiled_layout[0:height, width:width*2] = edges
+
+                cv2.imshow("Detected Lines (in red)",tiled_layout)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+                continue
+
             slic = Slic(num_components=2, compactness=10)
             assignment = slic.iterate(frame)
 
@@ -83,25 +119,9 @@ def process_continuous_frames(d):
 
             edges = np.clip(gradient_x + gradient_y, 0, 1) * 255
             edges = edges.astype(np.uint8)
-            
-            if parallelogram_points is not None:
-                rate = count_edge_pixels_in_parallelogram(edges,parallelogram_points)
-                if  edge_rate_queue.__len__() < 10:
-                    edge_rate_queue.enqueue(rate)
-                else:
-                    mean_rate = np.mean(np.array(edge_rate_queue.queue))
-                    change_rate = abs((rate-mean_rate)/mean_rate)
-                    if change_rate >= 0.5:
-                        print('vibrated')
-                        edge_rate_queue.clear()
-                        parallelogram_points = None                        
-                    else:
-                        edge_rate_queue.enqueue(rate)
 
             lines = cv2.HoughLinesP(edges, 1, np.pi / 180, hough_rate, None, minLineLength, maxLineGap)
             lines = remove_vertical_lines(lines)
-
-            temp_hough = hough_rate
 
             if len(lines) == 0:
                 while temp_hough > break_rate:
@@ -115,15 +135,51 @@ def process_continuous_frames(d):
             else:
                 parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
 
+            if parallelogram_points is not None:
+                if detach_flag:
+                    detach_flag = False
+                    detach_counter = 30
+                match_counter -= 1
+                if match_counter == 0 and matchFrame is None:
+                    match_counter = 10
+                    lightGlue_area = lightglue_detection_area(lines,frame)
+                    matchFrame = frame
+                elif match_counter == 0:
+                    match_counter = 10
+                    new_lightGlue_area = lightglue_detection_area(lines,frame)
+
+                    magnitudes = matcher.calculate_displacement(matchFrame,frame,lightGlue_area,new_lightGlue_area)
+
+                    lightGlue_area = new_lightGlue_area
+                    matchFrame = frame
+
+                    mean_magnitude = np.mean(magnitudes)
+                    if mean_magnitude > 10:
+                        print("Componet attached gentlely")
+            
+            if former_parallelogram_points is not None:
+                rate = count_edge_pixels_in_parallelogram(edges,former_parallelogram_points)
+                if  edge_rate_queue.__len__() < 10 and rate >= 0.02:
+                    edge_rate_queue.enqueue(rate)
+                elif edge_rate_queue.__len__() < 10 and rate < 0.02:
+                    edge_rate_queue.clear()
+                elif parallelogram_points is not None:
+                    mean_rate = np.mean(np.array(edge_rate_queue.queue))
+                    change_rate = abs((rate-mean_rate)/mean_rate)
+                    if change_rate >= 0.5:
+                        print('Component jumped')
+                        edge_rate_queue.clear()
+                    else:
+                        edge_rate_queue.enqueue(rate)
+                else:
+                    detach_flag = True
+                    print('Component disappeared')
             
             tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
-
-            # Place images into the layout
             tiled_layout[0:height, 0:width] = frame
             tiled_layout[0:height, width:width*2] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
             cv2.imshow("Detected Lines (in red)",tiled_layout)
-            # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     except Exception as e:
@@ -131,8 +187,8 @@ def process_continuous_frames(d):
     finally:
         cv2.destroyAllWindows()
 
-
-d = Digit("D20790") # Unique serial number
-d.connect()
-process_continuous_frames(d)
-d.disconnect()
+if __name__ == '__main__':
+    d = Digit("D20812") # Unique serial number
+    d.connect()
+    process_continuous_frames(d)
+    d.disconnect()

@@ -7,7 +7,8 @@ from skimage.metrics import structural_similarity as ssim # type: ignore
 from utils.draw_lines import (
     draw_line_and_parallelogram,
     remove_vertical_lines,
-    lightglue_detection_area
+    lightglue_detection_area,
+    compare_images
 )
 from utils.match import LightGlueMatcher
 
@@ -36,14 +37,6 @@ class FIFOQueue:
     def clear(self):
         self.queue = []
 
-def compare_images(imageA, imageB):
-    assert imageA.shape == imageB.shape, "Images must have the same dimensions"
-    
-    ssim_value, _ = ssim(imageA, imageB, full=True)
-
-    return ssim_value
-
-
 def count_edge_pixels_in_parallelogram(edges, vertices):
     mask = np.zeros_like(edges)
     cv2.fillPoly(mask, [vertices], 255)
@@ -63,15 +56,17 @@ def process_continuous_frames(d):
     hough_rate = 44
     #line_threshold = 10
     break_rate = 35
-    threshold_increment = 1  # How much to change the threshold by in each iteration
+    threshold_increment = 1 
     minLineLength = 117
     maxLineGap = 51
     match_counter = 10
+    detach_counter = 30
     parallelogram_points = None
     lightGlue_area = None
     matchFrame = None
+    detach_flag = False
     output_dir = "dataset"
-    os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
     edge_rate_queue = FIFOQueue(size=10)
     matcher = LightGlueMatcher()
 
@@ -103,34 +98,25 @@ def process_continuous_frames(d):
                 enhanced_image = clahe.apply(blurred_image)
 
             if former_parallelogram_points is None and ssim_value > 0.92:
+                if detach_flag and detach_counter>0:
+                    detach_counter -= 1
+                elif detach_flag:
+                    detach_flag = False
+                    detach_counter = 30
+                    print('Component detached')
                 edges = np.zeros((height, width, channels), dtype=np.uint8)
                 tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
-                # Place images into the layout
                 tiled_layout[0:height, 0:width] = frame
                 tiled_layout[0:height, width:width*2] = cv2.cvtColor(blurred_image, cv2.COLOR_GRAY2BGR)
                 tiled_layout[0:height, width*2:width*3] = edges
 
                 cv2.imshow("Detected Lines (in red)",tiled_layout)
-                # Break the loop if 'q' is pressed
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
                 continue
 
             # Canny Edge Detection
             edges = cv2.Canny(image=enhanced_image, threshold1=canny_threshold1, threshold2=canny_threshold2) # Canny Edge Detection
-
-            if former_parallelogram_points is not None:
-                rate = count_edge_pixels_in_parallelogram(edges,former_parallelogram_points)
-                if  edge_rate_queue.__len__() < 10:
-                    edge_rate_queue.enqueue(rate)
-                else:
-                    mean_rate = np.mean(np.array(edge_rate_queue.queue))
-                    change_rate = abs((rate-mean_rate)/mean_rate)
-                    if change_rate >= 0.5:
-                        print('shifted or lost traction')
-                        edge_rate_queue.clear()
-                    else:
-                        edge_rate_queue.enqueue(rate)
 
             # First attempt to find lines with initial rate
             lines = cv2.HoughLinesP(edges, 1, np.pi / 180, temp_hough, None, minLineLength, maxLineGap)
@@ -150,6 +136,9 @@ def process_continuous_frames(d):
                 parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
 
             if parallelogram_points is not None:
+                if detach_flag:
+                    detach_flag = False
+                    detach_counter = 30
                 match_counter -= 1
                 if match_counter == 0 and matchFrame is None:
                     match_counter = 10
@@ -166,17 +155,32 @@ def process_continuous_frames(d):
 
                     mean_magnitude = np.mean(magnitudes)
                     if mean_magnitude > 10:
-                        print("attached!")
+                        print("Componet attached gentlely")
+            
+            if former_parallelogram_points is not None:
+                rate = count_edge_pixels_in_parallelogram(edges,former_parallelogram_points)
+                if  edge_rate_queue.__len__() < 10 and rate >= 0.02:
+                    edge_rate_queue.enqueue(rate)
+                elif edge_rate_queue.__len__() < 10 and rate < 0.02:
+                    edge_rate_queue.clear()
+                elif parallelogram_points is not None:
+                    mean_rate = np.mean(np.array(edge_rate_queue.queue))
+                    change_rate = abs((rate-mean_rate)/mean_rate)
+                    if change_rate >= 0.5:
+                        print('Component jumped')
+                        edge_rate_queue.clear()
+                    else:
+                        edge_rate_queue.enqueue(rate)
+                else:
+                    detach_flag = True
+                    print('Component disappeared')
 
             tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
-
-            # Place images into the layout
             tiled_layout[0:height, 0:width] = frame
             tiled_layout[0:height, width:width*2] = cv2.cvtColor(blurred_image, cv2.COLOR_GRAY2BGR)
             tiled_layout[0:height, width*2:width*3] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
             cv2.imshow("Detected Lines (in red)",tiled_layout)
-            # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     except Exception as e:
