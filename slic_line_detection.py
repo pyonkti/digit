@@ -108,9 +108,13 @@ def process_continuous_frames(d):
                 ssim_value = compare_images(blurred_base_frame,blurred_image)
             
             if ssim_value > 0.9:
-                if detach_flag:
-                    print(detach_counter)
-                    if detach_counter > 0:
+                if edge_rate_queue.__len__() > 0:
+                    if detach_counter == 30:
+                        print('Component disappeared')
+                        with open(file_path, 'a') as file:
+                            file.write('Component disappeared' + '\n')
+                        detach_counter -= 1
+                    elif detach_counter > 0:
                         detach_counter -= 1
                     else:
                         detach_flag = False
@@ -128,6 +132,8 @@ def process_continuous_frames(d):
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
                 continue
+            
+            detach_counter = 30
 
             slic = Slic(num_components=2, compactness=1)
             assignment = slic.iterate(frame)
@@ -196,7 +202,7 @@ def process_continuous_frames(d):
                     edge_rate_queue.enqueue(rate)
                 elif edge_rate_queue.__len__() < 10 and rate < 0.02:
                     edge_rate_queue.clear()
-                elif lines_flag:
+                else:
                     mean_rate = np.mean(np.array(edge_rate_queue.queue))
                     change_rate = abs((rate-mean_rate)/mean_rate)
                     if change_rate >= 0.5:
@@ -207,11 +213,6 @@ def process_continuous_frames(d):
                         edge_rate_queue.clear()
                     else:
                         edge_rate_queue.enqueue(rate)
-                else:
-                    detach_flag = True
-                    print('Component disappeared')
-                    with open(file_path, 'a') as file:
-                        file.write('Component disappeared' + '\n')
             
             tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
             tiled_layout[0:height, 0:width] = frame
