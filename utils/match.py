@@ -8,7 +8,7 @@ from lightglue.utils import rbd
 
 class LightGlueMatcher:
     def __init__(self):
-        self.extractor = SuperPoint(max_num_keypoints=1024).eval().cuda()
+        self.extractor = SuperPoint(max_num_keypoints=2048).eval().cuda()
         self.matcher = LightGlue(features='superpoint', depth_confidence=0.9, width_confidence=0.95).eval().cuda()
 
     def calculate_displacement(self,frame0,frame1,area0,area1):

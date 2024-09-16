@@ -166,7 +166,7 @@ def draw_line_and_parallelogram(lines, frame, edges, width=10):
         cv2.line(frame, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
 
         # Draw the parallelogram around the extended line
-        #parallelogram_points = draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, frame)
+        parallelogram_points = draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, frame)
         #draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, edges)
 
     except TypeError as e:

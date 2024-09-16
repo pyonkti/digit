@@ -1,5 +1,7 @@
 import os
-from digit_interface import Digit
+from digit_interface import (
+    Digit
+)
 import cv2
 import numpy as np
 from datetime import datetime
@@ -59,16 +61,23 @@ def process_continuous_frames(d):
     threshold_increment = 1 
     minLineLength = 117
     maxLineGap = 51
-    match_counter = 10
+    match_counter = 3
     detach_counter = 30
     parallelogram_points = None
+    former_parallelogram_points = None
     lightGlue_area = None
     matchFrame = None
     detach_flag = False
+    lines_flag = False
     output_dir = "dataset"
     os.makedirs(output_dir, exist_ok=True)
     edge_rate_queue = FIFOQueue(size=10)
     matcher = LightGlueMatcher()
+
+    file_path = '/home/wei/Desktop/digit/digit/outcome_log/canny_log.txt'
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    with open(file_path, 'a') as file:
+        file.write( f'Timestamp: {timestamp}' + '\n')
 
     #skip first 20 frames for camera to adjust its white balance
     for _ in range(20):
@@ -81,9 +90,12 @@ def process_continuous_frames(d):
         while True:
             #found_lines = False
             temp_hough = hough_rate
-            #timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            if lines_flag:
+                former_parallelogram_points = parallelogram_points
+            else:
+                former_parallelogram_points = None
+            lines_flag = False
             #output_path = os.path.join(output_dir, f"detected_lines_{timestamp}.png")
-            former_parallelogram_points = parallelogram_points
             frame = d.get_frame()
             height, width, channels = frame.shape
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -97,13 +109,15 @@ def process_continuous_frames(d):
                 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
                 enhanced_image = clahe.apply(blurred_image)
 
-            if former_parallelogram_points is None and ssim_value > 0.92:
+            if former_parallelogram_points is None and ssim_value > 0.9:
                 if detach_flag and detach_counter>0:
                     detach_counter -= 1
                 elif detach_flag:
                     detach_flag = False
                     detach_counter = 30
                     print('Component detached')
+                    with open(file_path, 'a') as file:
+                            file.write('Component detached' + '\n')
                 edges = np.zeros((height, width, channels), dtype=np.uint8)
                 tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
                 tiled_layout[0:height, 0:width] = frame
@@ -121,25 +135,27 @@ def process_continuous_frames(d):
             # First attempt to find lines with initial rate
             lines = cv2.HoughLinesP(edges, 1, np.pi / 180, temp_hough, None, minLineLength, maxLineGap)
             lines = remove_vertical_lines(lines)
-            
+
             # Adjust rate until lines are found, adhering to break_rate limit
-            if len(lines) == 0:
+            if lines is None or len(lines) == 0:
                 while temp_hough > break_rate:
                     temp_hough -= threshold_increment
                     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, temp_hough, None, minLineLength, maxLineGap)
                     lines = remove_vertical_lines(lines)
 
-                    if len(lines) > 0:
+                    if lines is not None and len(lines) > 0:
                         parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
+                        lines_flag = True
                         break
             else:
                 parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
+                lines_flag = True
 
-            if parallelogram_points is not None:
+            if lines_flag:
+                match_counter -= 1
                 if detach_flag:
                     detach_flag = False
                     detach_counter = 30
-                match_counter -= 1
                 if match_counter == 0 and matchFrame is None:
                     match_counter = 10
                     lightGlue_area = lightglue_detection_area(lines,frame)
@@ -153,9 +169,17 @@ def process_continuous_frames(d):
                     lightGlue_area = new_lightGlue_area
                     matchFrame = frame
 
-                    mean_magnitude = np.mean(magnitudes)
-                    if mean_magnitude > 10:
-                        print("Componet attached gentlely")
+                    if magnitudes is not None and len(magnitudes) > 0:
+                        mean_magnitude = np.mean(magnitudes)
+                    else:
+                        mean_magnitude = 0
+
+                    print(mean_magnitude)
+
+                    if mean_magnitude > 14.5 and mean_magnitude < 25:
+                        print('Componet attached gently')
+                        with open(file_path, 'a') as file:
+                            file.write('Componet attached gently' + '\n')
             
             if former_parallelogram_points is not None:
                 rate = count_edge_pixels_in_parallelogram(edges,former_parallelogram_points)
@@ -163,17 +187,22 @@ def process_continuous_frames(d):
                     edge_rate_queue.enqueue(rate)
                 elif edge_rate_queue.__len__() < 10 and rate < 0.02:
                     edge_rate_queue.clear()
-                elif parallelogram_points is not None:
+                elif lines_flag:
                     mean_rate = np.mean(np.array(edge_rate_queue.queue))
                     change_rate = abs((rate-mean_rate)/mean_rate)
                     if change_rate >= 0.5:
                         print('Component jumped')
+                        with open(file_path, 'a') as file:
+                            file.write('Component jumped' + '\n')
                         edge_rate_queue.clear()
+                        detach_flag = True
                     else:
                         edge_rate_queue.enqueue(rate)
                 else:
                     detach_flag = True
                     print('Component disappeared')
+                    with open(file_path, 'a') as file:
+                        file.write('Component disappeared' + '\n')
 
             tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
             tiled_layout[0:height, 0:width] = frame
