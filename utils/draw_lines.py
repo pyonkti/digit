@@ -145,8 +145,7 @@ def lightglue_detection_area(lines,frame):
 
         # Draw the parallelogram on the image
         points = np.array([pt1, pt2, pt3, pt4], np.int32)
-        #cv2.polylines(frame, [points], isClosed=True, color=(0, 255, 0), thickness=2)
-
+        
     except TypeError as e:
         print(f"An error occurred while marking detection area: {e}")
         points = None

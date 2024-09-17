@@ -1,0 +1,109 @@
+Timestamp: 20240917_192104
+Mean magnitude: 32.27312088012695
+Component attached gently, after 1.394793 seconds
+Mean magnitude: 20.569398880004883
+Component attached gently, after 1.701615 seconds
+Mean magnitude: 3.7956604957580566
+Mean magnitude: 3.6589653491973877
+Mean magnitude: 2.7807915210723877
+Mean magnitude: 10.810012817382812
+Mean magnitude: 4.590308666229248
+Mean magnitude: 2.989722967147827
+Mean magnitude: 10.699254035949707
+Mean magnitude: 7.3887939453125
+Component disappeared: Mean magnitude: 7.3887939453125
+Mean magnitude: 3.8902130126953125
+Mean magnitude: 2.7730605602264404
+Component disappeared: Mean magnitude: 2.7730605602264404
+Mean magnitude: 1.1231266260147095
+Mean magnitude: 2.5321526527404785
+Mean magnitude: 3.3514723777770996
+Mean magnitude: 2.5262951850891113
+Mean magnitude: 42.94483184814453
+Component attached gently, after 6.1957 seconds
+Component jumped: Mean magnitude: 42.94483184814453
+Mean magnitude: 6.236600399017334
+Mean magnitude: 6.748823165893555
+Mean magnitude: 2.4395487308502197
+Mean magnitude: 8.98155689239502
+Mean magnitude: 4.079661846160889
+Mean magnitude: 7.612085819244385
+Mean magnitude: 1.1292442083358765
+Component disappeared: Mean magnitude: 1.1292442083358765
+Mean magnitude: 3.297226905822754
+Mean magnitude: 3.0739479064941406
+Component disappeared: Mean magnitude: 3.0739479064941406
+Mean magnitude: 5.7096757888793945
+Component disappeared: Mean magnitude: 5.7096757888793945
+Component disappeared: Mean magnitude: 5.7096757888793945
+Mean magnitude: 4.0376715660095215
+Component disappeared: Mean magnitude: 4.0376715660095215
+Mean magnitude: 1.8264873027801514
+Component disappeared: Mean magnitude: 1.8264873027801514
+Mean magnitude: 9.605031967163086
+Component jumped: Mean magnitude: 9.605031967163086
+Mean magnitude: 7.348421096801758
+Mean magnitude: 15.740460395812988
+Mean magnitude: 3.857059955596924
+Component disappeared: Mean magnitude: 3.857059955596924
+Mean magnitude: 2.746622085571289
+Component jumped: Mean magnitude: 2.746622085571289
+Mean magnitude: 7.494595527648926
+Mean magnitude: 2.7743124961853027
+Mean magnitude: 3.0408735275268555
+Mean magnitude: 4.582217693328857
+Mean magnitude: 7.78571891784668
+Mean magnitude: 2.714566946029663
+Mean magnitude: 7.379170894622803
+Mean magnitude: 4.6438140869140625
+Component disappeared: Mean magnitude: 4.6438140869140625
+Component detached
+Timestamp: 20240917_192224
+Mean magnitude: 42.62698745727539
+Component attached gently, after 1.637401 seconds
+Mean magnitude: 3.1910107135772705
+Mean magnitude: 4.100764751434326
+Mean magnitude: 2.3198676109313965
+Mean magnitude: 1.4354156255722046
+Mean magnitude: 3.1930317878723145
+Mean magnitude: 3.008052349090576
+Mean magnitude: 1.9159473180770874
+Mean magnitude: 0.47780951857566833
+Mean magnitude: 1.4856224060058594
+Component disappeared: Mean magnitude: 1.4856224060058594
+Mean magnitude: 2.2846086025238037
+Mean magnitude: 3.1434404850006104
+Mean magnitude: 3.398188829421997
+Mean magnitude: 2.8039238452911377
+Component disappeared: Mean magnitude: 2.8039238452911377
+Mean magnitude: 18.804412841796875
+Mean magnitude: 8.49158000946045
+Mean magnitude: 1.5955713987350464
+Mean magnitude: 5.769703388214111
+Mean magnitude: 9.823755264282227
+Component jumped: Mean magnitude: 9.823755264282227
+Mean magnitude: 4.040372848510742
+Mean magnitude: 3.216470956802368
+Mean magnitude: 5.740275859832764
+Mean magnitude: 12.363368034362793
+Mean magnitude: 5.006850242614746
+Component disappeared: Mean magnitude: 5.006850242614746
+Mean magnitude: 3.2345869541168213
+Mean magnitude: 5.301097393035889
+Component disappeared: Mean magnitude: 5.301097393035889
+Component jumped: Mean magnitude: 5.301097393035889
+Mean magnitude: 8.117984771728516
+Mean magnitude: 3.7634294033050537
+Mean magnitude: 9.719916343688965
+Mean magnitude: 11.099411964416504
+Mean magnitude: 9.51662826538086
+Mean magnitude: 18.620315551757812
+Component jumped: Mean magnitude: 18.620315551757812
+Mean magnitude: 6.901275157928467
+Mean magnitude: 25.04920196533203
+Component attached gently, after 12.002689 seconds
+Mean magnitude: 7.612326622009277
+Mean magnitude: 36.29913330078125
+Component attached gently, after 12.961925 seconds
+Mean magnitude: 5.74981164932251
+Mean magnitude: 7.826038837432861

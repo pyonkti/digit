@@ -4,6 +4,8 @@ from digit_interface import (
 )
 import cv2
 import numpy as np
+import threading
+import queue
 from datetime import datetime
 from fast_slic import Slic
 from utils.match import LightGlueMatcher
@@ -13,6 +15,10 @@ from utils.draw_lines import (
     lightglue_detection_area,
     compare_images
 )
+
+file_path = '/home/wei/Desktop/digit/digit/outcome_log/slic_log.txt'
+log_queue = queue.Queue()
+stop_logging = threading.Event()
 
 class FIFOQueue:
     def __init__(self, size):
@@ -39,6 +45,18 @@ class FIFOQueue:
     def clear(self):
         self.queue = []
 
+def async_log_writer(log_queue, file_path):
+    with open(file_path, 'a') as file:
+        while not stop_logging.is_set() or not log_queue.empty():
+            try:
+                # Get a log message from the queue
+                message = log_queue.get(timeout=0.5)  # Wait for 0.5 seconds if the queue is empty
+                file.write(message)
+                file.flush()  # Ensure the message is written to disk
+                log_queue.task_done()
+            except queue.Empty:
+                continue
+
 def count_edge_pixels_in_parallelogram(edges, vertices):
     mask = np.zeros_like(edges)
     cv2.fillPoly(mask, [vertices], 255)
@@ -58,7 +76,7 @@ def process_continuous_frames(d):
     minLineLength = 117
     maxLineGap = 51
     parallelogram_points = None
-    match_counter = 1
+    match_counter = 10
     lightGlue_area = None
     matchFrame = None
     detach_flag = False
@@ -69,6 +87,9 @@ def process_continuous_frames(d):
     edge_rate_queue = FIFOQueue(size=10)
     former_parallelogram_points = None
     lines_flag = False
+
+    draw_frame = True
+    date_time = True
 
     file_path = '/home/wei/Desktop/digit/digit/outcome_log/slic_log.txt'
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -81,9 +102,11 @@ def process_continuous_frames(d):
         d.get_frame()
 
     background_frame = d.get_frame()
-    background_frame = background_frame[:, :, 0]
-    background_frame = np.stack((background_frame,)*3, axis=-1)  # Convert to 3 channels
-    blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY), (gaussian, gaussian), 0), median)
+    grey_base_image = cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY)
+    blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(grey_base_image, (gaussian, gaussian), 0), median)
+
+    log_thread = threading.Thread(target=async_log_writer, args=(log_queue, file_path))
+    log_thread.start()
 
     try:
         while True:
@@ -96,32 +119,33 @@ def process_continuous_frames(d):
 
             frame = d.get_frame()
             height, width, channels = frame.shape
-            original_frame = frame
-            frame = frame[:, :, 0]
-            frame = np.stack((frame,)*3, axis=-1)  # Convert to 3 channels
-
+            original_frame = d.get_frame()
+            blue_frame = frame[:, :, 1] 
+            blue_frame = np.ascontiguousarray(blue_frame)
+            blue_frame = cv2.cvtColor(blue_frame, cv2.COLOR_GRAY2BGR)
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             blurred_image = cv2.GaussianBlur(grey_image, (gaussian, gaussian), 0)
             blurred_image = cv2.medianBlur(blurred_image,median)
 
-            if blurred_base_frame is not None:  
-                ssim_value = compare_images(blurred_base_frame,blurred_image)
-            
+            ssim_value = compare_images(blurred_base_frame,blurred_image)
             if ssim_value > 0.9:
                 if edge_rate_queue.__len__() > 0:
                     if detach_counter == 30:
                         print('Component disappeared')
-                        with open(file_path, 'a') as file:
-                            file.write('Component disappeared' + '\n')
+                        message = f'Component disappeared: Mean magnitude: {mean_magnitude}\n'
+                        log_queue.put(message)
                         detach_counter -= 1
                     elif detach_counter > 0:
                         detach_counter -= 1
                     else:
                         detach_flag = False
                         detach_counter = 30
+                        edge_rate_queue.clear()
                         print('Component detached')
-                        with open(file_path, 'a') as file:
-                            file.write('Component detached' + '\n')
+                        message = f'Component detached\n'
+                        log_queue.put(message)
+                        stop_logging.set()
+                        log_thread.join()
 
                 edges = np.zeros((height, width, channels), dtype=np.uint8)
                 tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
@@ -130,13 +154,19 @@ def process_continuous_frames(d):
 
                 cv2.imshow("Detected Lines (in red)",tiled_layout)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
+                    stop_logging.set()
+                    log_thread.join()
                     break
                 continue
             
+            if date_time:    
+                datetime1 = datetime.now()
+                date_time = False
+
             detach_counter = 30
 
-            slic = Slic(num_components=2, compactness=1)
-            assignment = slic.iterate(frame)
+            slic = Slic(num_components=2, compactness=10)
+            assignment = slic.iterate(blue_frame)
 
             edges = np.zeros((height, width), dtype=np.uint8)
 
@@ -172,29 +202,35 @@ def process_continuous_frames(d):
                     detach_flag = False
                     detach_counter = 30
                 if match_counter == 0 and matchFrame is None:
-                    match_counter = 10
+                    match_counter = 5
                     lightGlue_area = lightglue_detection_area(lines,original_frame)
-                    matchFrame = frame
+                    matchFrame = d.get_frame()
                 elif match_counter == 0:
-                    match_counter = 10
+                    match_counter = 5
                     new_lightGlue_area = lightglue_detection_area(lines,original_frame)
 
-                    magnitudes = matcher.calculate_displacement(matchFrame,frame,lightGlue_area,new_lightGlue_area)
+                    magnitudes = matcher.calculate_displacement(matchFrame,original_frame,lightGlue_area,new_lightGlue_area)
 
                     lightGlue_area = new_lightGlue_area
-                    matchFrame = frame
+                    matchFrame = d.get_frame()
 
                     if magnitudes is not None and len(magnitudes) > 0:
                         mean_magnitude = np.mean(magnitudes)
                     else:
                         mean_magnitude = 0
 
-                    #print(mean_magnitude)
-                    
-                    if mean_magnitude > 14.5 and mean_magnitude <25:
+                    message = f'Mean magnitude: {mean_magnitude}\n'
+                    log_queue.put(message)
+
+                    if mean_magnitude > 20:
+                        datetime2 = datetime.now()
+                        time_difference = datetime2 - datetime1
+                        time_difference_in_seconds = time_difference.total_seconds()
+                        #print('draw frame 2')
+                        #cv2.imwrite('./image2.png', original_frame)
                         print('Componet attached gently')
-                        with open(file_path, 'a') as file:
-                            file.write('Componet attached gently' + '\n')
+                        message = f'Component attached gently, after {time_difference_in_seconds} seconds\n'
+                        log_queue.put(message)
             
             if former_parallelogram_points is not None:
                 rate = count_edge_pixels_in_parallelogram(edges,former_parallelogram_points)
@@ -202,15 +238,20 @@ def process_continuous_frames(d):
                     edge_rate_queue.enqueue(rate)
                 elif edge_rate_queue.__len__() < 10 and rate < 0.02:
                     edge_rate_queue.clear()
-                else:
+                elif lines_flag:
+                    #if draw_frame:
+                        #print('draw frame 1')
+                        #cv2.imwrite('./image1.png',original_frame)
+                        #draw_frame = False
                     mean_rate = np.mean(np.array(edge_rate_queue.queue))
                     change_rate = abs((rate-mean_rate)/mean_rate)
                     if change_rate >= 0.5:
-                        detach_flag = True
                         print('Component jumped')
-                        with open(file_path, 'a') as file:
-                            file.write('Component jumped' + '\n')
+                        message = f'Component jumped: Mean magnitude: {mean_magnitude}\n'
+                        log_queue.put(message)
+
                         edge_rate_queue.clear()
+                        detach_flag = True
                     else:
                         edge_rate_queue.enqueue(rate)
             
@@ -220,6 +261,8 @@ def process_continuous_frames(d):
 
             cv2.imshow("Detected Lines (in red)",tiled_layout)
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                stop_logging.set()
+                log_thread.join()
                 break
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -229,6 +272,5 @@ def process_continuous_frames(d):
 if __name__ == '__main__':
     d = Digit("D20812") # Unique serial number
     d.connect()
-    d.set_intensity_rgb(intensity_r = 0, intensity_g = 0, intensity_b = 15)
     process_continuous_frames(d)
     d.disconnect()

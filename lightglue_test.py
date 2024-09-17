@@ -21,7 +21,7 @@ class CannyEdgeDetector:
         self.threshold_increment = 1 
         self.minLineLength= 117
         self.maxLineGap= 51
-        self.background_frame = cv2.imread('/root/digit/edge_detection_autoencoder/dataset/empty/detected_lines_20240820_141634.png')
+        self.background_frame = cv2.imread('/home/wei/Desktop/digit/digit/image_backgroud.png')
         self.blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(cv2.cvtColor(self.background_frame, cv2.COLOR_BGR2GRAY), (self.gaussian, self.gaussian), 0), self.median)
 
     def locate_edge(self,frame):
@@ -98,14 +98,14 @@ def draw_matches(image0, image1, points0, points1):
         pt1 = tuple(map(int, pt1))
 
         # Draw keypoints on the first image
-        cv2.circle(combined_image, pt0, 5, (0, 0, 255), -1)
+        cv2.circle(combined_image, pt0, 2, (0, 0, 255), -1)
 
         # Draw keypoints on the second image (shift points to the right)
         pt1_shifted = (pt1[0] + offset, pt1[1])
-        cv2.circle(combined_image, pt1_shifted, 5, (0, 0, 255), -1)
+        cv2.circle(combined_image, pt1_shifted, 2, (0, 0, 255), -1)
 
         # Draw line connecting the keypoints
-        cv2.line(combined_image, pt0, pt1_shifted, (0, 0, 255), 1)
+        cv2.line(combined_image, pt0, pt1_shifted, (255, 255, 255), 1)
 
     # Show the combined image
     cv2.imshow('Matches', combined_image)
@@ -127,8 +127,8 @@ if __name__ =='__main__':
     extractor = SuperPoint(max_num_keypoints=1024).eval().cuda()  # load the extractor
     matcher = LightGlue(features='superpoint', depth_confidence=0.9, width_confidence=0.95).eval().cuda()  # load the matcher
 
-    image0 = cv2.imread('/root/digit/edge_detection_autoencoder/dataset/images/detected_lines_20240806_173151.png')
-    image1 = cv2.imread('/root/digit/edge_detection_autoencoder/dataset/images/detected_lines_20240806_173152.png')
+    image0 = cv2.imread('/home/wei/Desktop/digit/digit/image1.png')
+    image1 = cv2.imread('//home/wei/Desktop/digit/digit/image2.png')
     
     area0 = edgeDetector.locate_edge(image0)
     area1 = edgeDetector.locate_edge(image1)
@@ -157,5 +157,5 @@ if __name__ =='__main__':
 
     displacements, magnitudes = calculate_displacement(points0, points1)
     print("Displacements:", displacements)
-    print("Magnitudes:", magnitudes)
+    print("Magnitudes:", np.mean(magnitudes))
     draw_matches(image0, image1, points0, points1)
