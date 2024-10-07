@@ -101,7 +101,7 @@ def draw_parallelogram_around_line(x1, y1, x2, y2, width, image):
 
     # Draw the parallelogram on the image
     points = np.array([pt1, pt2, pt3, pt4], np.int32)
-    #cv2.polylines(image, [points], isClosed=True, color=(0, 255, 0), thickness=2)
+    cv2.polylines(image, [points], isClosed=True, color=(0, 255, 0), thickness=2)
 
     return points
 
@@ -112,8 +112,8 @@ def lightglue_detection_area(parallelogram_points):
     x3, y3 = parallelogram_points[2]  
     x4, y4 = parallelogram_points[3]
 
-    pt1 = (x1, y1)
-    pt2 = (x2, y2)
+    pt1 = (x1, y1 - 10)
+    pt2 = (x2, y2 - 10)
     pt3 = (x3, y3 + 70)
     pt4 = (x4, y4 + 70)
 

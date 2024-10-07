@@ -149,9 +149,12 @@ if __name__ =='__main__':
 
     image0 = cv2.imread('/root/digit/image1.png')
     image1 = cv2.imread('/root/digit/image2.png')
+
+    image0_copy = image0.copy()
+    image1_copy = image1.copy()
     
-    area0 = edgeDetector.locate_edge(image0)
-    area1 = edgeDetector.locate_edge(image1)
+    area0 = edgeDetector.locate_edge(image0_copy)
+    area1 = edgeDetector.locate_edge(image1_copy)
 
     if area0 is not None and area1 is not None:
         extracted_image0 = numpy_image_to_torch(image0).cuda()
@@ -169,8 +172,8 @@ if __name__ =='__main__':
         points0 = points0.cpu().numpy()
         points1 = points1.cpu().numpy()
 
-        cv2.polylines(image0, [area0], isClosed=True, color=(0, 255, 0), thickness=2)
-        cv2.polylines(image1, [area1], isClosed=True, color=(0, 255, 0), thickness=2)
+        #cv2.polylines(image0, [area0], isClosed=True, color=(0, 255, 0), thickness=2)
+        #cv2.polylines(image1, [area1], isClosed=True, color=(0, 255, 0), thickness=2)
 
         filtered_indices = filter_matches_in_region(points0, points1, area0, area1)
 
@@ -183,6 +186,6 @@ if __name__ =='__main__':
             displacements, magnitudes = calculate_displacement(filtered_points0, filtered_points1)
             print("Displacements:", displacements)
             print("Magnitudes:", np.mean(magnitudes))
-            draw_matches(image0, image1, filtered_points0, filtered_points1)
+            draw_matches(image0_copy, image1_copy, filtered_points0, filtered_points1)
 
     
