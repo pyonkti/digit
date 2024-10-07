@@ -16,7 +16,7 @@ from utils.draw_lines import (
 )
 from utils.match import LightGlueMatcher
 
-file_path = '/home/wei/Desktop/digit/digit/outcome_log/canny_log.txt'
+file_path = '/home/wei/Desktop/digit/outcome_log/canny_log.txt'
 log_queue = queue.Queue()
 stop_logging = threading.Event()
 
@@ -100,7 +100,7 @@ def process_continuous_frames(d):
         file.write( f'Timestamp: {timestamp}' + '\n')
 
     #skip first 20 frames for camera to adjust its white balance
-    for _ in range(20):
+    for _ in range(60):
         d.get_frame()
 
     background_frame = d.get_frame()
@@ -134,7 +134,7 @@ def process_continuous_frames(d):
             ssim_value = compare_images(blurred_base_frame,blurred_image)
             blurred_image = cv2.absdiff(blurred_image, blurred_base_frame)
             
-            if former_parallelogram_points is None and ssim_value > 0.9:
+            if former_parallelogram_points is None and ssim_value > 0.96:
                 if detach_flag and detach_counter>0:
                     detach_counter -= 1
                 elif detach_flag:
@@ -210,13 +210,13 @@ def process_continuous_frames(d):
                         print("No key points detected")
                         mean_magnitude = 0
 
-                    message = f'Mean magnitude: {mean_magnitude}\n'
+                    datetime2 = datetime.now()
+                    time_difference = datetime2 - datetime1
+                    time_difference_in_seconds = time_difference.total_seconds()
+                    message = f'Mean magnitude: {mean_magnitude}, after {time_difference_in_seconds} seconds\n'
                     log_queue.put(message)
 
-                    if mean_magnitude > 20:
-                        datetime2 = datetime.now()
-                        time_difference = datetime2 - datetime1
-                        time_difference_in_seconds = time_difference.total_seconds()
+                    if mean_magnitude > 4:
                         #print('draw frame 2')
                         #cv2.imwrite('./image2.png', original_frame)
                         print('Componet attached gently')

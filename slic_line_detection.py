@@ -16,7 +16,7 @@ from utils.draw_lines import (
     compare_images
 )
 
-file_path = '/home/wei/Desktop/digit/digit/outcome_log/slic_log.txt'
+file_path = '/home/wei/Desktop/digit/outcome_log/slic_log.txt'
 log_queue = queue.Queue()
 stop_logging = threading.Event()
 
@@ -98,7 +98,7 @@ def process_continuous_frames(d):
 
 
     #skip first 20 frames for camera to adjust its white balance
-    for _ in range(20):
+    for _ in range(60):
         d.get_frame()
 
     background_frame = d.get_frame()
@@ -128,7 +128,7 @@ def process_continuous_frames(d):
             blurred_image = cv2.medianBlur(blurred_image,median)
 
             ssim_value = compare_images(blurred_base_frame,blurred_image)
-            if ssim_value > 0.9:
+            if ssim_value > 0.96:
                 if edge_rate_queue.__len__() > 0:
                     if detach_counter == 30:
                         print('Component disappeared')
@@ -220,13 +220,13 @@ def process_continuous_frames(d):
                         print("No key points detected")
                         mean_magnitude = 0
 
-                    message = f'Mean magnitude: {mean_magnitude}\n'
+                    datetime2 = datetime.now()
+                    time_difference = datetime2 - datetime1
+                    time_difference_in_seconds = time_difference.total_seconds()
+                    message = f'Mean magnitude: {mean_magnitude}, after {time_difference_in_seconds} seconds\n'
                     log_queue.put(message)
 
-                    if mean_magnitude > 20:
-                        datetime2 = datetime.now()
-                        time_difference = datetime2 - datetime1
-                        time_difference_in_seconds = time_difference.total_seconds()
+                    if mean_magnitude > 4:
                         #print('draw frame 2')
                         #cv2.imwrite('./image2.png', original_frame)
                         print('Componet attached gently')

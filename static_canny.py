@@ -69,14 +69,14 @@ def process_continuous_frames():
     output_dir = "dataset"
     os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
 
-    background_frame = cv2.imread('/root/digit/image_backgroud.png')
+    background_frame = cv2.imread('/home/wei/Desktop/digit/image_backgroud.png')
     grey_base_frame = cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY)
     blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(grey_base_frame, (gaussian, gaussian), 0), median)
     while True:
         try:
             temp_hough = hough_rate
 
-            frame = cv2.imread('/root/digit/image1.png')
+            frame = cv2.imread('/home/wei/Desktop/digit/image1.png')
             height, width, channels = frame.shape
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
