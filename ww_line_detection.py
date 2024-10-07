@@ -74,7 +74,7 @@ def process_continuous_frames(d):
     lines_flag = False
     gaussian = 23
     median = 5
-    match_counter = 3
+    match_counter = 5
     lightGlue_area = None
     matchFrame = None
     detach_flag = False
@@ -212,7 +212,7 @@ def process_continuous_frames(d):
                     message = f'Mean magnitude: {mean_magnitude}, after {time_difference_in_seconds} seconds\n'
                     log_queue.put(message)
 
-                    if mean_magnitude > 4:
+                    if mean_magnitude > 3:
                         #print('draw frame 2')
                         #cv2.imwrite('./image2.png', original_frame)
                         print('Componet attached gently')

@@ -79,7 +79,7 @@ def process_continuous_frames(d):
     threshold_increment = 1 
     minLineLength = 117
     maxLineGap = 51
-    match_counter = 15
+    match_counter = 5
     detach_counter = 30
     parallelogram_points = None
     former_parallelogram_points = None
@@ -192,11 +192,11 @@ def process_continuous_frames(d):
                     detach_flag = False
                     detach_counter = 30
                 if match_counter == 0 and matchFrame is None:
-                    match_counter = 15
+                    match_counter = 5
                     lightGlue_area = lightglue_detection_area(parallelogram_points)
                     matchFrame = d.get_frame()
                 elif match_counter == 0:
-                    match_counter = 15
+                    match_counter = 5
                     new_lightGlue_area = lightglue_detection_area(parallelogram_points)
 
                     magnitudes = matcher.calculate_displacement(matchFrame,original_frame,lightGlue_area,new_lightGlue_area)
@@ -216,7 +216,7 @@ def process_continuous_frames(d):
                     message = f'Mean magnitude: {mean_magnitude}, after {time_difference_in_seconds} seconds\n'
                     log_queue.put(message)
 
-                    if mean_magnitude > 4:
+                    if mean_magnitude > 3:
                         #print('draw frame 2')
                         #cv2.imwrite('./image2.png', original_frame)
                         print('Componet attached gently')

@@ -76,7 +76,7 @@ def process_continuous_frames(d):
     minLineLength = 117
     maxLineGap = 51
     parallelogram_points = None
-    match_counter = 10
+    match_counter = 5
     lightGlue_area = None
     matchFrame = None
     detach_flag = False
@@ -91,7 +91,7 @@ def process_continuous_frames(d):
     draw_frame = True
     date_time = True
 
-    file_path = '/home/wei/Desktop/digit/digit/outcome_log/slic_log.txt'
+    file_path = '/home/wei/Desktop/digit/outcome_log/slic_log.txt'
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     with open(file_path, 'a') as file:
         file.write( f'Timestamp: {timestamp}' + '\n')
@@ -120,9 +120,10 @@ def process_continuous_frames(d):
             frame = d.get_frame()
             height, width, channels = frame.shape
             original_frame = d.get_frame()
-            blue_frame = frame[:, :, 1] 
-            blue_frame = np.ascontiguousarray(blue_frame)
-            blue_frame = cv2.cvtColor(blue_frame, cv2.COLOR_GRAY2BGR)
+
+            blue_frame = np.zeros_like(frame)
+            blue_frame[:, :, 1] = frame[:, :, 1]
+            
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             blurred_image = cv2.GaussianBlur(grey_image, (gaussian, gaussian), 0)
             blurred_image = cv2.medianBlur(blurred_image,median)
@@ -132,7 +133,7 @@ def process_continuous_frames(d):
                 if edge_rate_queue.__len__() > 0:
                     if detach_counter == 30:
                         print('Component disappeared')
-                        message = f'Component disappeared: Mean magnitude: {mean_magnitude}\n'
+                        message = f'Component disappeared \n'
                         log_queue.put(message)
                         detach_counter -= 1
                     elif detach_counter > 0:
@@ -142,7 +143,7 @@ def process_continuous_frames(d):
                         detach_counter = 30
                         edge_rate_queue.clear()
                         print('Component detached')
-                        message = f'Component detached\n'
+                        message = f'Component detached \n'
                         log_queue.put(message)
                         stop_logging.set()
                         log_thread.join()
@@ -165,6 +166,8 @@ def process_continuous_frames(d):
 
             detach_counter = 30
 
+            #blurred_image = cv2.GaussianBlur(frame, (gaussian, gaussian), 0)
+            #blurred_image = cv2.medianBlur(blurred_image,median)
             slic = Slic(num_components=2, compactness=10)
             assignment = slic.iterate(blue_frame)
 
@@ -226,7 +229,7 @@ def process_continuous_frames(d):
                     message = f'Mean magnitude: {mean_magnitude}, after {time_difference_in_seconds} seconds\n'
                     log_queue.put(message)
 
-                    if mean_magnitude > 4:
+                    if mean_magnitude > 3:
                         #print('draw frame 2')
                         #cv2.imwrite('./image2.png', original_frame)
                         print('Componet attached gently')
@@ -248,7 +251,7 @@ def process_continuous_frames(d):
                     change_rate = abs((rate-mean_rate)/mean_rate)
                     if change_rate >= 0.5:
                         print('Component jumped')
-                        message = f'Component jumped: Mean magnitude: {mean_magnitude}\n'
+                        message = f'Component jumped \n'
                         log_queue.put(message)
 
                         edge_rate_queue.clear()

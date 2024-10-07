@@ -114,4 +114,4 @@ def evaluate(model_path, image_path):
     plt.show()
 
 # Example usage
-evaluate('unet_line_detection(2).pth', '/root/digit/edge_detection_autoencoder/dataset/images/detected_lines_20240806_173354.png')
+evaluate('../checkpoint/unet_line_detection(2).pth', '/home/wei/Desktop/digit/image1.png')

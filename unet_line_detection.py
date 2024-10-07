@@ -77,7 +77,7 @@ def process_continuous_frames(d):
     """
 
     lines_flag = False
-    model_path = '/home/wei/Desktop/digit/digit/edge_detection_autoencoder/unet_line_detection.pth'
+    model_path = '/home/wei/Desktop/digit/checkpoint/unet_line_detection(2).pth'
     gaussian = 23
     median = 5
     hough_rate = 44
@@ -85,7 +85,7 @@ def process_continuous_frames(d):
     threshold_increment = 1  # How much to change the threshold by in each iteration
     minLineLength = 117
     maxLineGap = 51
-    match_counter = 3
+    match_counter = 5
     lightGlue_area = None
     matchFrame = None
     detach_flag = False
@@ -96,7 +96,7 @@ def process_continuous_frames(d):
     output_dir = "dataset"
     os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
     edge_rate_queue = FIFOQueue(size=10)
-    output_threshold = 0.5
+    output_threshold = 0.3
 
     draw_frame = True
     date_time = True
@@ -167,7 +167,8 @@ def process_continuous_frames(d):
                 datetime1 = datetime.now()
                 date_time = False
 
-            original_image = Image.fromarray(frame).convert("RGB")
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            original_image = Image.fromarray(frame)
 
             image_tensor = transform(original_image).unsqueeze(0).cuda()
 
@@ -231,7 +232,7 @@ def process_continuous_frames(d):
                     message = f'Mean magnitude: {mean_magnitude}, after {time_difference_in_seconds} seconds\n'
                     log_queue.put(message)
 
-                    if mean_magnitude > 4:
+                    if mean_magnitude > 3:
                         #print('draw frame 2')
                         #cv2.imwrite('./image2.png', original_frame)
                         print('Componet attached gently')
