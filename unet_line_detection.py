@@ -96,7 +96,7 @@ def process_continuous_frames(d):
     output_dir = "dataset"
     os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
     edge_rate_queue = FIFOQueue(size=10)
-    output_threshold = 0.3
+    output_threshold = 0.5
 
     draw_frame = True
     date_time = True
@@ -208,11 +208,11 @@ def process_continuous_frames(d):
                     detach_counter = 30
                 if match_counter == 0 and matchFrame is None:
                     match_counter = 5
-                    lightGlue_area = lightglue_detection_area(lines,original_frame)
+                    lightGlue_area = lightglue_detection_area(parallelogram_points)
                     matchFrame = d.get_frame()
                 elif match_counter == 0:
                     match_counter = 5
-                    new_lightGlue_area = lightglue_detection_area(lines,original_frame)
+                    new_lightGlue_area = lightglue_detection_area(parallelogram_points)
 
                     magnitudes = matcher.calculate_displacement(matchFrame,original_frame,lightGlue_area,new_lightGlue_area)
 

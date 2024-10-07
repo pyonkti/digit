@@ -12,12 +12,10 @@ class LightGlueMatcher:
         self.matcher = LightGlue(features='superpoint', depth_confidence=0.9, width_confidence=0.95).eval().cuda()
 
     def calculate_displacement(self,frame0,frame1,area0,area1):
-        extracted_region0 = extract_parallelogram_region(frame0, area0)
-        extracted_region1 = extract_parallelogram_region(frame1, area1)
-        extracted_image0 = numpy_image_to_torch(extracted_region0).cuda()
-        extracted_image1 = numpy_image_to_torch(extracted_region1).cuda()
-         # extract local features
-        feats0 = self.extractor.extract(extracted_image0)  # auto-resize the image, disable with resize=None
+        extracted_image0 = numpy_image_to_torch(frame0).cuda()
+        extracted_image1 = numpy_image_to_torch(frame1).cuda()
+
+        feats0 = self.extractor.extract(extracted_image0) 
         feats1 = self.extractor.extract(extracted_image1)
 
         # match the features
@@ -29,8 +27,16 @@ class LightGlueMatcher:
         points0 = points0.cpu().numpy()
         points1 = points1.cpu().numpy()
 
-        magnitudes = calculate_displacement(points0, points1)
-        return magnitudes
+        filtered_indices = filter_matches_in_region(points0, points1, area0, area1)
+
+        if filtered_indices.size == 0:
+            return None
+        else:
+            # If you need the filtered matches
+            filtered_points0 = points0[filtered_indices]
+            filtered_points1 = points1[filtered_indices]
+            magnitudes = calculate_displacement(filtered_points0, filtered_points1)
+            return magnitudes
 
 def calculate_displacement(points_previous, points_current):
     displacements = points_current - points_previous
@@ -58,3 +64,19 @@ def numpy_image_to_torch(image: np.ndarray) -> torch.Tensor:
     else:
         raise ValueError(f"Not an image: {image.shape}")
     return torch.tensor(image / 255.0, dtype=torch.float)
+
+def filter_matches_in_region(points0, points1, region0, region1):
+    def is_point_in_region(point, region):
+        x, y = point
+        result = cv2.pointPolygonTest(region, (x, y), False)
+        return result >= 0
+
+    filtered_indices = []
+    region_contour0 = np.array(region0, dtype=np.int32)
+    region_contour1 = np.array(region1, dtype=np.int32)
+
+    for idx, (point0, point1) in enumerate(zip(points0, points1)):
+        if is_point_in_region(point0, region_contour0) and is_point_in_region(point1, region_contour1):
+            filtered_indices.append(idx)
+
+    return np.array(filtered_indices)

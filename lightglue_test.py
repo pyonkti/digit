@@ -7,7 +7,8 @@ from lightglue import LightGlue, SuperPoint
 from lightglue.utils import rbd
 from utils.draw_lines import (
     remove_vertical_lines,
-    lightglue_detection_area
+    lightglue_detection_area,
+    draw_line_and_parallelogram
 )
 
 class CannyEdgeDetector:
@@ -21,7 +22,7 @@ class CannyEdgeDetector:
         self.threshold_increment = 1 
         self.minLineLength= 117
         self.maxLineGap= 51
-        self.background_frame = cv2.imread('/home/wei/Desktop/digit/digit/image_backgroud.png')
+        self.background_frame = cv2.imread('/root/digit/image_backgroud.png')
         self.blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(cv2.cvtColor(self.background_frame, cv2.COLOR_BGR2GRAY), (self.gaussian, self.gaussian), 0), self.median)
 
     def locate_edge(self,frame):
@@ -51,10 +52,12 @@ class CannyEdgeDetector:
                 lines = remove_vertical_lines(lines)
 
                 if len(lines) > 0:
-                    lightGlue_area = lightglue_detection_area(lines,frame)
+                    parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
+                    lightGlue_area = lightglue_detection_area(parallelogram_points)
                     break
         else:
-            lightGlue_area = lightglue_detection_area(lines,frame)
+            parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
+            lightGlue_area = lightglue_detection_area(parallelogram_points)
         return lightGlue_area
 
 def extract_parallelogram_region(image, points):
@@ -121,41 +124,65 @@ def calculate_displacement(points_previous, points_current):
 
     return displacements, magnitudes
 
+def filter_matches_in_region(points0, points1, region0, region1):
+    def is_point_in_region(point, region):
+        x, y = point
+        result = cv2.pointPolygonTest(region, (x, y), False)
+        return result >= 0
+
+    filtered_indices = []
+    region_contour0 = np.array(region0, dtype=np.int32)
+    region_contour1 = np.array(region1, dtype=np.int32)
+
+    for idx, (point0, point1) in enumerate(zip(points0, points1)):
+        if is_point_in_region(point0, region_contour0) and is_point_in_region(point1, region_contour1):
+            filtered_indices.append(idx)
+
+    return np.array(filtered_indices)
+
+
 if __name__ =='__main__':
     edgeDetector  = CannyEdgeDetector()
     # SuperPoint+LightGlue
     extractor = SuperPoint(max_num_keypoints=1024).eval().cuda()  # load the extractor
     matcher = LightGlue(features='superpoint', depth_confidence=0.9, width_confidence=0.95).eval().cuda()  # load the matcher
 
-    image0 = cv2.imread('/home/wei/Desktop/digit/digit/image1.png')
-    image1 = cv2.imread('//home/wei/Desktop/digit/digit/image2.png')
+    image0 = cv2.imread('/root/digit/image1.png')
+    image1 = cv2.imread('/root/digit/image2.png')
     
     area0 = edgeDetector.locate_edge(image0)
     area1 = edgeDetector.locate_edge(image1)
 
     if area0 is not None and area1 is not None:
-        extracted_region0 = extract_parallelogram_region(image0, area0)
-        extracted_region1 = extract_parallelogram_region(image1, area1)
-        extracted_image0 = numpy_image_to_torch(extracted_region0).cuda()
-        extracted_image1 = numpy_image_to_torch(extracted_region1).cuda()
-    else:
         extracted_image0 = numpy_image_to_torch(image0).cuda()
         extracted_image1 = numpy_image_to_torch(image1).cuda()
 
-    # extract local features
-    feats0 = extractor.extract(extracted_image0)  # auto-resize the image, disable with resize=None
-    feats1 = extractor.extract(extracted_image1)
+        feats0 = extractor.extract(extracted_image0) 
+        feats1 = extractor.extract(extracted_image1)
 
-    # match the features
-    matches01 = matcher({'image0': feats0, 'image1': feats1})
-    feats0, feats1, matches01 = [rbd(x) for x in [feats0, feats1, matches01]]  # remove batch dimension
-    matches = matches01['matches']  # indices with shape (K,2)
-    points0 = feats0['keypoints'][matches[..., 0]]  # coordinates in image #0, shape (K,2)
-    points1 = feats1['keypoints'][matches[..., 1]]  # coordinates in image #1, shape (K,2)
-    points0 = points0.cpu().numpy()
-    points1 = points1.cpu().numpy()
+        # match the features
+        matches01 = matcher({'image0': feats0, 'image1': feats1})
+        feats0, feats1, matches01 = [rbd(x) for x in [feats0, feats1, matches01]]  # remove batch dimension
+        matches = matches01['matches']  # indices with shape (K,2)
+        points0 = feats0['keypoints'][matches[..., 0]]  # coordinates in image #0, shape (K,2)
+        points1 = feats1['keypoints'][matches[..., 1]]  # coordinates in image #1, shape (K,2)
+        points0 = points0.cpu().numpy()
+        points1 = points1.cpu().numpy()
 
-    displacements, magnitudes = calculate_displacement(points0, points1)
-    print("Displacements:", displacements)
-    print("Magnitudes:", np.mean(magnitudes))
-    draw_matches(image0, image1, points0, points1)
+        cv2.polylines(image0, [area0], isClosed=True, color=(0, 255, 0), thickness=2)
+        cv2.polylines(image1, [area1], isClosed=True, color=(0, 255, 0), thickness=2)
+
+        filtered_indices = filter_matches_in_region(points0, points1, area0, area1)
+
+        if filtered_indices.size == 0:
+            print("No matches found within the specified regions.")
+        else:
+            # If you need the filtered matches
+            filtered_points0 = points0[filtered_indices]
+            filtered_points1 = points1[filtered_indices]
+            displacements, magnitudes = calculate_displacement(filtered_points0, filtered_points1)
+            print("Displacements:", displacements)
+            print("Magnitudes:", np.mean(magnitudes))
+            draw_matches(image0, image1, filtered_points0, filtered_points1)
+
+    

@@ -87,72 +87,41 @@ def draw_parallelogram_around_line(x1, y1, x2, y2, width, image):
     # Normalize the direction vector
     length = math.sqrt(dx ** 2 + dy ** 2)
     ux = dx / length
-    uy = dy / length
 
     # Perpendicular vector to the line
-    perp_ux = -uy
     perp_uy = ux
 
     # Calculate the four points of the parallelogram
-    offset_x = perp_ux * width
     offset_y = perp_uy * width
 
-    pt1 = (int(x1 + offset_x), int(y1 + offset_y))
-    pt2 = (int(x2 + offset_x), int(y2 + offset_y))
-    pt3 = (int(x2 - offset_x), int(y2 - offset_y))
-    pt4 = (int(x1 - offset_x), int(y1 - offset_y))
+    pt1 = (int(x1), int(y1 + offset_y))
+    pt2 = (int(x2), int(y2 + offset_y))
+    pt3 = (int(x2), int(y2 - offset_y))
+    pt4 = (int(x1), int(y1 - offset_y))
 
     # Draw the parallelogram on the image
     points = np.array([pt1, pt2, pt3, pt4], np.int32)
-    cv2.polylines(image, [points], isClosed=True, color=(0, 255, 0), thickness=2)
+    #cv2.polylines(image, [points], isClosed=True, color=(0, 255, 0), thickness=2)
 
     return points
 
-def lightglue_detection_area(lines,frame):
-    try:
-        # Find the best line segment
-        best_line = select_best_line(lines, frame.shape)
-        x1, y1, x2, y2 = best_line[0]
+def lightglue_detection_area(parallelogram_points):
 
-        # Calculate the points where the line crosses the image edges
-        pt1, pt2 = line_to_image_edges(x1, y1, x2, y2, frame)
+    x1, y1 = parallelogram_points[0]
+    x2, y2 = parallelogram_points[1]  
+    x3, y3 = parallelogram_points[2]  
+    x4, y4 = parallelogram_points[3]
 
-        # Calculate the direction vector of the line
-        x1 = pt1[0] 
-        y1=pt1[1]
-        x2=pt2[0]
-        y2=pt2[1]
+    pt1 = (x1, y1)
+    pt2 = (x2, y2)
+    pt3 = (x3, y3 + 70)
+    pt4 = (x4, y4 + 70)
 
-        dx = x2 - x1
-        dy = y2 - y1
-
-        # Normalize the direction vector
-        length = math.sqrt(dx ** 2 + dy ** 2)
-        ux = dx / length
-        uy = dy / length
-
-        # Perpendicular vector to the line
-        perp_ux = -uy
-        perp_uy = ux
-
-        # Calculate the four points of the parallelogram
-        offset_y = perp_uy * 80
-
-        pt1 = (int(x1), int(y1 + offset_y))
-        pt2 = (int(x2), int(y2 + offset_y))
-        pt3 = (int(x2), int(y2))
-        pt4 = (int(x1), int(y1))
-
-        # Draw the parallelogram on the image
-        points = np.array([pt1, pt2, pt3, pt4], np.int32)
-        
-    except TypeError as e:
-        print(f"An error occurred while marking detection area: {e}")
-        points = None
+    points = np.array([pt1, pt2, pt3, pt4], np.int32)
 
     return points
 
-def draw_line_and_parallelogram(lines, frame, edges, width=10):
+def draw_line_and_parallelogram(lines, frame, edges, width):
     try:
         # Find the best line segment
         best_line = select_best_line(lines, frame.shape)
@@ -162,11 +131,10 @@ def draw_line_and_parallelogram(lines, frame, edges, width=10):
         pt1, pt2 = line_to_image_edges(x1, y1, x2, y2, frame)
 
         # Draw the line across the entire image
-        cv2.line(frame, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
+        #cv2.line(frame, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
 
         # Draw the parallelogram around the extended line
         parallelogram_points = draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, frame)
-        #draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, edges)
 
     except TypeError as e:
         print(f"An error occurred while drawing lines: {e}")

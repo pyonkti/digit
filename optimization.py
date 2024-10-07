@@ -143,7 +143,7 @@ def main():
     storage = "sqlite:///optuna.db"
 
     study = optuna.create_study(study_name="stable grasp study", storage=storage, load_if_exists = True, direction = 'minimize')  # Default is to minimize
-    study.optimize(objective, n_trials=30)  # Adjust number of trials based on available time and resources
+    study.optimize(objective, n_trials=100)  # Adjust number of trials based on available time and resources
     
     with open("best_trial.txt", "a") as file:
         file.write(json.dumps(study.best_trial.params))

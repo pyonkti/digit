@@ -131,11 +131,11 @@ def process_continuous_frames():
 
                     if len(lines) > 0:
                         parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
-                        lightGlue_area = lightglue_detection_area(lines,frame)
+                        lightGlue_area = lightglue_detection_area(parallelogram_points)
                         break
             else:
                 parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
-                lightGlue_area = lightglue_detection_area(lines,frame)
+                lightGlue_area = lightglue_detection_area(parallelogram_points)
 
             tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
 
