@@ -131,7 +131,7 @@ def draw_line_and_parallelogram(lines, frame, edges, width):
         pt1, pt2 = line_to_image_edges(x1, y1, x2, y2, frame)
 
         # Draw the line across the entire image
-        #cv2.line(frame, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
+        cv2.line(frame, pt1, pt2, (0, 0, 255), 3, cv2.LINE_AA)
 
         # Draw the parallelogram around the extended line
         parallelogram_points = draw_parallelogram_around_line(pt1[0], pt1[1], pt2[0], pt2[1], width, frame)

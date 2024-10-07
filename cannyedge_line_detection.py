@@ -207,6 +207,7 @@ def process_continuous_frames(d):
                     if magnitudes is not None and len(magnitudes) > 0:
                         mean_magnitude = np.mean(magnitudes)
                     else:
+                        print("No key points detected")
                         mean_magnitude = 0
 
                     message = f'Mean magnitude: {mean_magnitude}\n'

@@ -203,11 +203,11 @@ def process_continuous_frames(d):
                     detach_counter = 30
                 if match_counter == 0 and matchFrame is None:
                     match_counter = 5
-                    lightGlue_area = lightglue_detection_area(lines,original_frame)
+                    lightGlue_area = lightglue_detection_area(parallelogram_points)
                     matchFrame = d.get_frame()
                 elif match_counter == 0:
                     match_counter = 5
-                    new_lightGlue_area = lightglue_detection_area(lines,original_frame)
+                    new_lightGlue_area = lightglue_detection_area(parallelogram_points)
 
                     magnitudes = matcher.calculate_displacement(matchFrame,original_frame,lightGlue_area,new_lightGlue_area)
 
@@ -217,6 +217,7 @@ def process_continuous_frames(d):
                     if magnitudes is not None and len(magnitudes) > 0:
                         mean_magnitude = np.mean(magnitudes)
                     else:
+                        print("No key points detected")
                         mean_magnitude = 0
 
                     message = f'Mean magnitude: {mean_magnitude}\n'
