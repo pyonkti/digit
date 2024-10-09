@@ -58,7 +58,7 @@ def process_continuous_frames():
     gaussian = 23
     median = 5
     canny_threshold1=20
-    canny_threshold2=30
+    canny_threshold2=60
     hough_rate = 44
     #line_threshold = 10
     break_rate = 35
@@ -69,14 +69,14 @@ def process_continuous_frames():
     output_dir = "dataset"
     os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
 
-    background_frame = cv2.imread('/home/wei/Desktop/digit/image_backgroud.png')
+    background_frame = cv2.imread('image_backgroud.png')
     grey_base_frame = cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY)
     blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(grey_base_frame, (gaussian, gaussian), 0), median)
     while True:
         try:
             temp_hough = hough_rate
 
-            frame = cv2.imread('/home/wei/Desktop/digit/image1.png')
+            frame = cv2.imread('image1.png')
             height, width, channels = frame.shape
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -105,7 +105,7 @@ def process_continuous_frames():
             clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
             enhanced_image = clahe.apply(diff_image)
             # Canny Edge Detection
-            edges = cv2.Canny(image=grey_image, threshold1=canny_threshold1, threshold2=canny_threshold2) # Canny Edge Detection
+            edges = cv2.Canny(image=enhanced_image, threshold1=canny_threshold1, threshold2=canny_threshold2) # Canny Edge Detection
 
             # First attempt to find lines with initial rate
             lines = cv2.HoughLinesP(edges, 1, np.pi / 180, temp_hough, None, minLineLength, maxLineGap)
@@ -126,12 +126,15 @@ def process_continuous_frames():
                 parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
                 lightGlue_area = lightglue_detection_area(parallelogram_points)
 
-            tiled_layout = np.zeros((height, width * 3, channels), dtype=np.uint8)
+            tiled_layout = np.zeros((height, width * 6, channels), dtype=np.uint8)
 
             # Place images into the layout
             tiled_layout[0:height, 0:width] = frame
-            tiled_layout[0:height, width:width*2] = cv2.cvtColor(diff_image, cv2.COLOR_GRAY2BGR)
-            tiled_layout[0:height, width*2:width*3] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+            tiled_layout[0:height, width:width*2] = cv2.cvtColor(grey_image, cv2.COLOR_GRAY2BGR)
+            tiled_layout[0:height, width*2:width*3] = cv2.cvtColor(blurred_image, cv2.COLOR_GRAY2BGR)
+            tiled_layout[0:height, width*3:width*4] = cv2.cvtColor(diff_image, cv2.COLOR_GRAY2BGR)
+            tiled_layout[0:height, width*4:width*5] = cv2.cvtColor(enhanced_image, cv2.COLOR_GRAY2BGR)
+            tiled_layout[0:height, width*5:width*6] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
             cv2.imshow("Detected Lines (in red)",tiled_layout)
             # Break the loop if 'q' is pressed

@@ -17,7 +17,7 @@ from utils.draw_lines import (
 )
 from utils.edge import draw_edge
 
-file_path = '/home/wei/Desktop/digit/outcome_log/ww_log.txt'
+file_path = 'outcome_log/ww_log.txt'
 log_queue = queue.Queue()
 stop_logging = threading.Event()
 
@@ -28,14 +28,14 @@ class FIFOQueue:
     
     def enqueue(self, item):
         if len(self.queue) >= self.size:
-            self.dequeue()  # Remove the oldest item to make space
+            self.dequeue() 
         self.queue.append(item)
     
     def dequeue(self):
         if self.queue:
             return self.queue.pop(0)
         else:
-            return None  # or raise an exception
+            return None 
     
     def __str__(self):
         return str(self.queue)
@@ -50,10 +50,9 @@ def async_log_writer(log_queue, file_path):
     with open(file_path, 'a') as file:
         while not stop_logging.is_set() or not log_queue.empty():
             try:
-                # Get a log message from the queue
-                message = log_queue.get(timeout=0.5)  # Wait for 0.5 seconds if the queue is empty
+                message = log_queue.get(timeout=0.5) 
                 file.write(message)
-                file.flush()  # Ensure the message is written to disk
+                file.flush() 
                 log_queue.task_done()
             except queue.Empty:
                 continue
@@ -88,7 +87,7 @@ def process_continuous_frames(d):
     maxLineGap = 51
     parallelogram_points = None
     output_dir = "dataset"
-    os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True) 
     edge_rate_queue = FIFOQueue(size=10)
 
     draw_frame = True
@@ -103,7 +102,7 @@ def process_continuous_frames(d):
     else:
         device = torch.device('cpu')
 
-    #skip first 20 frames for camera to adjust its white balance
+    #skip first 60 frames for camera to adjust its white balance
     for _ in range(60):
         d.get_frame()
 
@@ -252,7 +251,6 @@ def process_continuous_frames(d):
             tiled_layout[0:height, width:width*2] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
             cv2.imshow("Detected Lines (in red)",tiled_layout)
-            # Break the loop if 'q' is pressed
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 stop_logging.set()
                 log_thread.join()

@@ -81,8 +81,8 @@ def process_continuous_frames():
         try:
             temp_hough = hough_rate
 
-            frame = cv2.imread('/root/digit/image1.png')
-            original_frame = cv2.imread('/root/digit/image1.png')
+            frame = cv2.imread('/root/digit/image2.png')
+            original_frame = cv2.imread('/root/digit/image2.png')
             height, width, channels = frame.shape
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 

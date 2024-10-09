@@ -282,7 +282,8 @@ Mean magnitude: 1.743584394454956, after 13.68731 seconds
 Mean magnitude: 1.334459900856018, after 13.884591 seconds
 Mean magnitude: 1.998400330543518, after 14.080815 seconds
 Component disappeared: Mean magnitude: 1.998400330543518
-Component detachedTimestamp: 20241007_192716
+Component detached
+Timestamp: 20241007_192716
 Mean magnitude: 1.916141152381897, after 0.656328 seconds
 Mean magnitude: 2.2412593364715576, after 0.872989 seconds
 Mean magnitude: 2.0311238765716553, after 1.077375 seconds

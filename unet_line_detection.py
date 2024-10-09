@@ -23,7 +23,7 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-file_path = '/home/wei/Desktop/digit/outcome_log/unet_log.txt'
+file_path = 'outcome_log/unet_log.txt'
 log_queue = queue.Queue()
 stop_logging = threading.Event()
 
@@ -77,7 +77,7 @@ def process_continuous_frames(d):
     """
 
     lines_flag = False
-    model_path = '/home/wei/Desktop/digit/checkpoint/unet_line_detection(2).pth'
+    model_path = 'checkpoint/unet_line_detection(2).pth'
     gaussian = 23
     median = 5
     hough_rate = 44
@@ -101,7 +101,7 @@ def process_continuous_frames(d):
     draw_frame = True
     date_time = True
 
-    file_path = '/home/wei/Desktop/digit/outcome_log/unet_log.txt'
+    file_path = 'outcome_log/unet_log.txt'
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     with open(file_path, 'a') as file:
         file.write( f'Timestamp: {timestamp}' + '\n')

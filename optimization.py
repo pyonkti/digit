@@ -1,6 +1,6 @@
 import sys
 import logging
-sys.path.append('/home/wei/Desktop/digit/pybind_src')
+sys.path.append('pybind_src')
 from datetime import datetime 
 import cv2
 import numpy as np

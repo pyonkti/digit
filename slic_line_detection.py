@@ -16,7 +16,7 @@ from utils.draw_lines import (
     compare_images
 )
 
-file_path = '/home/wei/Desktop/digit/outcome_log/slic_log.txt'
+file_path = 'outcome_log/slic_log.txt'
 log_queue = queue.Queue()
 stop_logging = threading.Event()
 
@@ -91,7 +91,7 @@ def process_continuous_frames(d):
     draw_frame = True
     date_time = True
 
-    file_path = '/home/wei/Desktop/digit/outcome_log/slic_log.txt'
+    file_path = 'outcome_log/slic_log.txt'
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     with open(file_path, 'a') as file:
         file.write( f'Timestamp: {timestamp}' + '\n')
@@ -168,7 +168,7 @@ def process_continuous_frames(d):
 
             #blurred_image = cv2.GaussianBlur(frame, (gaussian, gaussian), 0)
             #blurred_image = cv2.medianBlur(blurred_image,median)
-            slic = Slic(num_components=2, compactness=10)
+            slic = Slic(num_components=2, compactness=50)
             assignment = slic.iterate(blue_frame)
 
             edges = np.zeros((height, width), dtype=np.uint8)

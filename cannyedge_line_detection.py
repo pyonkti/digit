@@ -16,7 +16,7 @@ from utils.draw_lines import (
 )
 from utils.match import LightGlueMatcher
 
-file_path = '/home/wei/Desktop/digit/outcome_log/canny_log.txt'
+file_path = 'outcome_log/canny_log.txt'
 log_queue = queue.Queue()
 stop_logging = threading.Event()
 
@@ -27,14 +27,14 @@ class FIFOQueue:
     
     def enqueue(self, item):
         if len(self.queue) >= self.size:
-            self.dequeue()  # Remove the oldest item to make space
+            self.dequeue()
         self.queue.append(item)
     
     def dequeue(self):
         if self.queue:
             return self.queue.pop(0)
         else:
-            return None  # or raise an exception
+            return None 
     
     def __str__(self):
         return str(self.queue)
@@ -49,10 +49,9 @@ def async_log_writer(log_queue, file_path):
     with open(file_path, 'a') as file:
         while not stop_logging.is_set() or not log_queue.empty():
             try:
-                # Get a log message from the queue
-                message = log_queue.get(timeout=0.5)  # Wait for 0.5 seconds if the queue is empty
+                message = log_queue.get(timeout=0.5)
                 file.write(message)
-                file.flush()  # Ensure the message is written to disk
+                file.flush()
                 log_queue.task_done()
             except queue.Empty:
                 continue
@@ -99,7 +98,7 @@ def process_continuous_frames(d):
     with open(file_path, 'a') as file:
         file.write( f'Timestamp: {timestamp}' + '\n')
 
-    #skip first 20 frames for camera to adjust its white balance
+    #skip first 60 frames for the camera to adjust its white balance
     for _ in range(60):
         d.get_frame()
 
@@ -134,6 +133,7 @@ def process_continuous_frames(d):
             ssim_value = compare_images(blurred_base_frame,blurred_image)
             blurred_image = cv2.absdiff(blurred_image, blurred_base_frame)
             
+            # Bypassing empty frames
             if former_parallelogram_points is None and ssim_value > 0.96:
                 if detach_flag and detach_counter>0:
                     detach_counter -= 1
@@ -186,6 +186,7 @@ def process_continuous_frames(d):
                 parallelogram_points = draw_line_and_parallelogram(lines, frame, edges, width=10)
                 lines_flag = True
 
+            # Measure displacement of Key Points Once it can capture consecutive edges
             if lines_flag:
                 match_counter -= 1
                 if detach_flag:
@@ -223,6 +224,7 @@ def process_continuous_frames(d):
                         message = f'Component attached gently, after {time_difference_in_seconds} seconds\n'
                         log_queue.put(message)
             
+            # If current edge is very different from last one then it is considered as a flipp
             if former_parallelogram_points is not None:
                 rate = count_edge_pixels_in_parallelogram(edges,former_parallelogram_points)
                 if  edge_rate_queue.__len__() < 10 and rate >= 0.02:

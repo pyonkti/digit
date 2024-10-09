@@ -68,15 +68,15 @@ def process_continuous_frames():
     output_dir = "dataset"
     os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
 
-    background_frame = cv2.imread('/root/digit/image_backgroud.png')
+    background_frame = cv2.imread('image_backgroud.png')
     grey_base_image = cv2.cvtColor(background_frame, cv2.COLOR_BGR2GRAY)
     blurred_base_frame = cv2.medianBlur(cv2.GaussianBlur(grey_base_image, (gaussian, gaussian), 0), median)
     while True:
         try:
             temp_hough = hough_rate
 
-            frame = cv2.imread('/root/digit/image1.png')
-            original_frame = cv2.imread('/root/digit/image1.png')
+            frame = cv2.imread('image1.png')
+            original_frame = cv2.imread('image1.png')
             height, width, channels = frame.shape
             
             grey_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -85,14 +85,14 @@ def process_continuous_frames():
 
             ssim_value = compare_images(blurred_base_frame,blurred_image)
             
-            #blue_frame = np.zeros_like(frame)
-            #blue_frame[:, :, 1] = frame[:, :, 1]
-            #frame = blue_frame
+            blue_frame = np.zeros_like(frame)
+            blue_frame[:, :, 1] = frame[:, :, 1]
+            frame = blue_frame
 
             if ssim_value > 0.95:
                 edges = np.zeros((height, width, channels), dtype=np.uint8)
                 tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
-                tiled_layout[0:height, 0:width] = frame
+                tiled_layout[0:height, 0:width] = original_frame
                 tiled_layout[0:height, width:width*2] = edges
 
                 cv2.imshow("Detected Lines (in red)",tiled_layout)
@@ -141,7 +141,7 @@ def process_continuous_frames():
 
             # Place images into the layout
             tiled_layout = np.zeros((height, width * 2, channels), dtype=np.uint8)
-            tiled_layout[0:height, 0:width] = frame
+            tiled_layout[0:height, 0:width] = original_frame
             tiled_layout[0:height, width:width*2] = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
 
             cv2.imshow("Detected Lines (in red)",tiled_layout)

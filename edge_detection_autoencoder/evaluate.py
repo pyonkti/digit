@@ -114,4 +114,4 @@ def evaluate(model_path, image_path):
     plt.show()
 
 # Example usage
-evaluate('../checkpoint/unet_line_detection(2).pth', '/home/wei/Desktop/digit/image1.png')
+evaluate('../checkpoint/unet_line_detection(2).pth', '../image1.png')
